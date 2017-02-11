@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+ * the frame of index page
+ * 
+ * @author: yunzhi li
+ * @version: 2016/12/1 17:25
+ *           Id
+-->
+<head>
+    <!-- 头部CSS和JS引入 -->
+    {% block head %}
+    {% endblock %}
+    <!-- 头部引入 end -->
+</head>
+<body>
+
+<div class="container-fluid">
+    <!-- banner 开始 -->
+    {% block banner %}
+    {% endblock %}
+    <!-- banner end -->
+
+    <!-- 楼层开始 -->
+    <div class="row row_floor">
+        <div class="col col-12">
+            <!-- 一楼开始 -->
+            {% block floor_1 %}
+            {% endblock %}
+            <!-- 一楼 end -->
+
+            <!-- 二楼开始 -->
+            {% block floor_2 %}
+            {% endblock %}
+            <!-- 二楼 end -->
+
+            <!-- 领取开始 -->
+            {% block lingqu %}
+            {% endblock %}
+            <!-- 领取 end -->
+        </div>
+    </div>
+    <!-- 楼层 end -->
+</div>
+
+<!-- 各种弹窗 -->
+{% block popup %}
+{% endblock %}
+<!-- 各种弹窗 end -->
+
+</body>
+</html>

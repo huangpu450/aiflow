@@ -8,3 +8,14 @@ body {
     color: var(--font-color-normal);
 }
 
+.clearfix {
+    clear: fix;
+}
+
+.container-fluid {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    clear: fix;
+}

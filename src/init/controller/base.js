@@ -33,7 +33,8 @@ export default class extends Common {
     /**
      * 项目编译
      */
-    * makeAction() {
+    // * makeAction() {
+    async makeAction() {
         // 项目发布变量赋值
         this.assign(this.proDistParam());
 
@@ -53,7 +54,8 @@ export default class extends Common {
 
         for (var pageObj of compileArr) {
             this.assign(pageObj.data);
-            let cont = yield this.fetch('app/' + pageObj.name);
+            // let cont = yield this.fetch('app/' + pageObj.name);
+            let cont = await this.fetch('app/' + pageObj.name);
             fs.writeFile(distDir + '/' + pageObj.name + '.html', cont, function (err) {
                 if (err) {
                     throw err;
