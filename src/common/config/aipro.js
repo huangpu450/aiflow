@@ -119,6 +119,18 @@ export default {
             remUnit: 75,
             svn: ''
         }, {
+            sn: '2016-PP005',
+            name: 'sxdl',
+            title: '湖南三湘电缆',
+            type: 'wap',
+            dev: 'phone',
+            date: '2016-12-12',
+            remUnit: 75,
+            // less\css\sass\postcss
+            // 当前仍只支持前两种
+            compileCss: 'less',
+            svn: ''
+        }, {
             sn: '2016-HN020',
             name: 'qudaojz',
             title: '湖南渠道集中化平台',
@@ -134,7 +146,19 @@ export default {
             type: 'web',
             dev: 'pc',
             date: '2016-11-30',
-            remUnit: 20,
+            remUnit: 75,
+            // less\css\sass\postcss
+            // 当前仍只支持前两种
+            compileCss: 'less',
+            svn: ''
+        }, {
+            sn: '2016-HN034',
+            name: 'lakanjia',
+            title: '湖南移动-呼朋唤友来砍价',
+            type: 'wap',
+            dev: 'phone',
+            date: '2016-12-07',
+            remUnit: 75,
             // less\css\sass\postcss
             // 当前仍只支持前两种
             compileCss: 'less',

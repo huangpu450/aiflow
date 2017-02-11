@@ -31,7 +31,7 @@ var exec = cmd.exec;
 import postcss from 'gulp-postcss';
 import autoprefixer from 'autoprefixer';
 import cssgrace from 'cssgrace';
-import cssnext from 'cssnext';
+import cssnext from 'postcss-cssnext';
 import cssnano from 'cssnano';
 import cssimport from 'postcss-import';
 import cusmedia from 'postcss-custom-media';
@@ -107,6 +107,21 @@ function printProHead() {
 }
 
 /**
+ * 打印某一项目信息
+ * @param proInfo
+ */
+function printProInfo(proInfo) {
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + proInfo.title + ' 项目信息');
+    console.log('------------------------------------------------------------------');
+    console.log('Project title:: ' + proInfo.title);
+    console.log('Project SN:: ' + proInfo.sn);
+    console.log('Project Name:: ' + proInfo.name);
+    console.log('Surport Device Type:: ' + proInfo.dev);
+    console.log('------------------------------------------------------------------');
+}
+
+/**
  * 检查项目参数是否正确
  */
 function checkProParam() {
@@ -176,6 +191,20 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 脚本测试任务');
         break;
+    case 'list':
+        console.log('==================================================================');
+        console.log('-- 项目列表');
+        break;
+    case 'listpages':
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目包含页面列表');
+        checkProParam();
+        printProHead();
+        break;
+    case 'search':
+        console.log('==================================================================');
+        console.log('-- 搜索项目');
+        break;
     default :
         console.log('==================================================================');
         console.log('-- ' + proName + ' 项目自动监控');
@@ -184,6 +213,58 @@ switch (gulpAction) {
         printProHead();
         break;
 }
+
+// 列出当前工程下所管理的所有项目信息
+gulp.task('list', function () {
+    for (let pro of proList.pro) {
+        printProInfo(pro);
+        console.log(' ');
+    }
+});
+
+// 列出以关键词搜索到的项目信息
+gulp.task('search', function () {
+    var searchKey = gutil.env.key ? gutil.env.key : '';
+    console.log('-- 搜索关键词为:: ' + searchKey);
+    console.log(' ');
+    if (searchKey != '') {
+        for (let pro of proList.pro) {
+            if (pro.title.indexOf(searchKey) >= 0 || pro.sn.indexOf(searchKey) >= 0 || pro.name.indexOf(searchKey) >= 0) {
+                printProInfo(pro);
+                console.log(' ');
+            }
+        }
+    } else {
+        console.log('ERR:: The search keywords is empty, please check!');
+        process.exit();
+    }
+});
+
+// 列出项目所包含的页面信息
+gulp.task('listpages', function () {
+    var confPath = './src/' + proName + '/config/data.js';
+    var archiveConfPath = '../archive/' + proSn + '-' + proName + '-' + proTitle + '/src/' + proName + 'config/data.js';
+    var confExist = fs.existsSync(confPath);
+    var archiveConfExist = fs.existsSync(archiveConfPath);
+    var realPath;
+    if (confExist) {
+        realPath = confPath;
+    } else if (archiveConfExist) {
+        realPath = archiveConfPath;
+    }
+    var pagesData = require(realPath);
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + proTitle + ' 项目页面信息');
+    for (let page in pagesData.default.pages) {
+        var pageObj = pagesData.default.pages[page];
+        console.log('------------------------------------------------------------------');
+        console.log('-- ');
+        console.log('-- Page title:: ' + pageObj.title);
+        console.log('-- Page file name:: ' + pageObj.action + '.html');
+        console.log('-- ');
+        console.log('------------------------------------------------------------------');
+    }
+});
 
 // 清除原有目录
 gulp.task('clean', function () {
@@ -382,8 +463,6 @@ gulp.task('less', function () {
         // concat
         .pipe(postcss(devProcessors_concat))
         .pipe(concat('comm.css'))
-        // grace
-        .pipe(postcss(devProcessors_grace))
         .pipe(gulp.dest(srcDir + '/css'));
 });
 
@@ -406,8 +485,6 @@ gulp.task('groupLess', groupFiles(lessSrc, function (name, files) {
         // concat
         .pipe(postcss(devProcessors_concat))
         .pipe(concat(name + '.css'))
-        // grace
-        .pipe(postcss(getDevProcessorsGraceConf(name)))
         .pipe(gulp.dest(srcDir + '/css'));
 }));
 
@@ -432,7 +509,19 @@ gulp.task('grace', ['concat'], function () {
 });
 
 // the task of group grace css
-gulp.task('groupGrace', ['groupConcat'], groupFiles(cssConcatSrc, function (name, files) {
+var beforeGraceWorks = [];
+switch (compileCssType) {
+    case 'css':
+        beforeGraceWorks = ['groupConcat'];
+        break;
+    case 'less':
+        beforeGraceWorks = ['groupLess'];
+        break;
+    default:
+        beforeGraceWorks = ['groupConcat'];
+        break;
+}
+gulp.task('groupGrace', beforeGraceWorks, groupFiles(cssConcatSrc, function (name, files) {
     return gulp.src(files)
         .pipe(plumber())
         .pipe(postcss(getDevProcessorsGraceConf(name)))
@@ -441,19 +530,7 @@ gulp.task('groupGrace', ['groupConcat'], groupFiles(cssConcatSrc, function (name
 
 // 项目编译任务，包括CSS、JS等
 // task action:: make
-var beforeMakeWorks = [];
-switch (compileCssType) {
-    case 'css':
-        beforeMakeWorks = ['groupGrace'];
-        break;
-    case 'less':
-        beforeMakeWorks = ['groupLess'];
-        break;
-    default:
-        beforeMakeWorks = ['groupGrace'];
-        break;
-}
-gulp.task('make', beforeMakeWorks);
+gulp.task('make', ['groupGrace']);
 
 // 监控文件改动实现浏览器自动刷新任务
 // proxy server
@@ -479,7 +556,14 @@ gulp.task('browser-sync', function () {
 
 // 监控CSS变化
 gulp.task('watch', ['make'], function () {
-    gulp.watch(srcDir + '/css/src/*.css', ['grace']);
+    gulp.watch([
+            srcDir + '/css/src/*.css',
+            srcDir + '/css/src/**/*.css',
+            srcDir + '/css/less/*.less',
+            srcDir + '/css/less/**/*.less'
+        ],
+        ['groupGrace']
+    );
 });
 
 // the init task
@@ -591,6 +675,7 @@ gulp.task('release', function () {
 
     var releaseSource = [
         rootDir + '/*.*',
+        rootDir + '/.*',
         rootDir + '/archive',
         rootDir + '/releases',
 
@@ -622,7 +707,7 @@ gulp.task('release', function () {
     }).pipe(gulp.dest(releaseDir)).on('end', function () {
         // step 3
         // zip the releases
-        gulp.src(releaseDir + '/**/*.*')
+        gulp.src([releaseDir + '/**/*.*', releaseDir + '/**/.*',  releaseDir + '/.*'])
             .pipe(zip(releaseZipName))
             .pipe(gulp.dest(releaseRootDir))
             .on('end', function () {
