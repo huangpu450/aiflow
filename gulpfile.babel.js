@@ -18,6 +18,7 @@ import concat from 'gulp-concat';
 import fs from 'fs';
 import plumber from 'gulp-plumber';
 import zip from 'gulp-zip';
+import gutil from 'gulp-util';
 import moment from 'moment';
 import browserS from 'browser-sync';
 var browserSync = browserS.create();
@@ -37,21 +38,25 @@ import cusmedia from 'postcss-custom-media';
 import csscalc from 'postcss-calc';
 import px2rem from 'postcss-px2rem';
 import cssrmcomments from 'postcss-discard-comments';
+import groupFiles from 'gulp-group-files';
+import less from 'gulp-less';
+import sourcemaps from 'gulp-sourcemaps';
 
 // 接收任务参数
 // 项目序列号
-var proSn = gulp.env.sn ? gulp.env.sn : '';
-// 项目名称、标题、支持设备类型
-var proName, proTitle, deviceType, remUnit;
+var proSn = gutil.env.sn ? gutil.env.sn : '';
+// 项目名称、标题、支持设备类型、CSS编译方式
+var proName, proTitle, deviceType, remUnit, compileCssType;
 if (proSn === '') {
     // 传入项目名称方式执行任务
-    proName = gulp.env.pro ? gulp.env.pro : '';
+    proName = gutil.env.pro ? gutil.env.pro : '';
     for (let pro of proList.pro) {
         if (pro.name === proName) {
             proSn = pro.sn;
             proTitle = pro.title;
             deviceType = pro.dev;
             remUnit = pro.remUnit;
+            compileCssType = pro.compileCss ? pro.compileCss : 'css';
             break;
         }
     }
@@ -63,6 +68,7 @@ if (proSn === '') {
             proTitle = pro.title;
             deviceType = pro.dev;
             remUnit = pro.remUnit;
+            compileCssType = pro.compileCss ? pro.compileCss : 'css';
             break;
         }
     }
@@ -83,6 +89,7 @@ const proArchiveDir = archiveDir + '/' + proSn + '-' + proName + '-' + proTitle;
 const initSrcDir = logicDir + '/init';
 const initViewDir = viewDir + '/init';
 const initWwwDir = wwwDir + '/static/init';
+const gulpAction = gutil.env._[0];
 
 /**
  * 打印项目任务参数信息
@@ -119,8 +126,6 @@ function checkProDir() {
         process.exit();
     }
 }
-
-const gulpAction = gulp.env._[0];
 
 // 判断任务参数是否正确，如：项目名称
 switch (gulpAction) {
@@ -166,6 +171,10 @@ switch (gulpAction) {
         checkProParam();
         checkProDir();
         printProHead();
+        break;
+    case 'test':
+        console.log('==================================================================');
+        console.log('-- 脚本测试任务');
         break;
     default :
         console.log('==================================================================');
@@ -244,47 +253,72 @@ var distProcessors = [
 
 // CSS合并
 var devProcessors_concat;
+// concat config for pc
+var devProcessors_concat_pc = [
+    cssimport,
+    csscalc,
+    cusmedia,
+    cssnext(),
+    autoprefixer({
+        browsers: ['>1%'],
+        cascade: true,
+        remove: true
+    }),
+];
+// concat config for phone
+var devProcessors_concat_phone = [
+    cssimport,
+    csscalc,
+    cusmedia,
+    cssnext(),
+    autoprefixer({
+        browsers: ['not ie <= 8'],
+        cascade: true,
+        remove: true
+    }),
+];
 var devProcessors_grace;
+// grace config for pc
+var devProcessors_grace_pc = [
+    cssgrace
+];
+// grace config for phone
+var devProcessors_grace_phone = [
+    cssgrace,
+    px2rem({remUnit: remUnit}),
+];
 
 // switch the device type
 switch (deviceType) {
     // 针对PC端设备的任务配置
     case 'pc':
-        devProcessors_concat = [
-            cssimport,
-            csscalc,
-            cusmedia,
-            cssnext(),
-            autoprefixer({
-                browsers: ['>1%'],
-                cascade: true,
-                remove: true
-            }),
-        ];
-
-        devProcessors_grace = [
-            cssgrace,
-        ];
+        devProcessors_concat = devProcessors_concat_pc;
+        devProcessors_grace = devProcessors_grace_pc;
         break;
     // 针对移动端设备的任务配置
     case 'phone':
-        devProcessors_concat = [
-            cssimport,
-            csscalc,
-            cusmedia,
-            cssnext(),
-            autoprefixer({
-                browsers: ['not ie <= 8'],
-                cascade: true,
-                remove: true
-            }),
-        ];
-
-        devProcessors_grace = [
-            cssgrace,
-            px2rem({remUnit: remUnit}),
-        ];
+        devProcessors_concat = devProcessors_concat_phone;
+        devProcessors_grace = devProcessors_grace_phone;
         break;
+}
+
+// 根据设备类型返回 grace 配置数组
+function getDevProcessorsGraceConf(devType) {
+    var confArr;
+    switch (devType) {
+        // 针对PC端设备的任务配置
+        case 'web':
+            confArr = devProcessors_grace_pc;
+            break;
+        // 针对移动端设备的任务配置
+        case 'wap':
+            confArr = devProcessors_grace_phone;
+            break;
+        default:
+            confArr = devProcessors_grace;
+    }
+
+    return confArr;
 }
 
 // CSS编译任务
@@ -296,19 +330,98 @@ gulp.task('css', function () {
 });
 
 // 配置需要打包合并的CSS源文件路径
-var srcArr = [
+var cssArr = [
     srcDir + '/css/src/main.css',
 ];
+
+var lessArr = [
+    srcDir + '/css/less/main.less',
+];
+
+var cssSrc = {
+    'comm': [
+        srcDir + '/css/src/main.css'
+    ],
+    'web': [
+        srcDir + '/css/src/web.css'
+    ],
+    'wap': [
+        srcDir + '/css/src/wap.css'
+    ]
+};
+
+var lessSrc = {
+    'comm': [
+        srcDir + '/css/less/main.less'
+    ],
+    'web': [
+        srcDir + '/css/less/web.less'
+    ],
+    'wap': [
+        srcDir + '/css/less/wap.less'
+    ]
+};
 
 // the task for concat css into comm.css
 gulp.task('concat', function () {
     console.log('------------------------------------------------------------------');
-    return gulp.src(srcArr)
+    return gulp.src(cssArr)
         .pipe(plumber())
         .pipe(postcss(devProcessors_concat))
         .pipe(concat('comm.css'))
         .pipe(gulp.dest(srcDir + '/css'));
 });
+
+// LESS编译任务
+gulp.task('less', function () {
+    return gulp.src(lessArr)
+        .pipe(plumber())
+        .pipe(sourcemaps.init())
+        .pipe(less())
+        .pipe(sourcemaps.write())
+        // concat
+        .pipe(postcss(devProcessors_concat))
+        .pipe(concat('comm.css'))
+        // grace
+        .pipe(postcss(devProcessors_grace))
+        .pipe(gulp.dest(srcDir + '/css'));
+});
+
+// the task for group concat css into every on file
+gulp.task('groupConcat', groupFiles(cssSrc, function (name, files) {
+    return gulp.src(files)
+        .pipe(plumber())
+        .pipe(postcss(devProcessors_concat))
+        .pipe(concat(name + '.css'))
+        .pipe(gulp.dest(srcDir + '/css'));
+}));
+
+// group compile the less files
+gulp.task('groupLess', groupFiles(lessSrc, function (name, files) {
+    return gulp.src(files)
+        .pipe(plumber())
+        .pipe(sourcemaps.init())
+        .pipe(less())
+        .pipe(sourcemaps.write())
+        // concat
+        .pipe(postcss(devProcessors_concat))
+        .pipe(concat(name + '.css'))
+        // grace
+        .pipe(postcss(getDevProcessorsGraceConf(name)))
+        .pipe(gulp.dest(srcDir + '/css'));
+}));
+
+var cssConcatSrc = {
+    'comm': [
+        srcDir + '/css/comm.css'
+    ],
+    'web': [
+        srcDir + '/css/web.css'
+    ],
+    'wap': [
+        srcDir + '/css/wap.css'
+    ]
+};
 
 // the task of grace css
 gulp.task('grace', ['concat'], function () {
@@ -318,9 +431,29 @@ gulp.task('grace', ['concat'], function () {
         .pipe(gulp.dest(srcDir + '/css'));
 });
 
+// the task of group grace css
+gulp.task('groupGrace', ['groupConcat'], groupFiles(cssConcatSrc, function (name, files) {
+    return gulp.src(files)
+        .pipe(plumber())
+        .pipe(postcss(getDevProcessorsGraceConf(name)))
+        .pipe(gulp.dest(srcDir + '/css'));
+}));
+
 // 项目编译任务，包括CSS、JS等
 // task action:: make
-gulp.task('make', ['grace']);
+var beforeMakeWorks = [];
+switch (compileCssType) {
+    case 'css':
+        beforeMakeWorks = ['groupGrace'];
+        break;
+    case 'less':
+        beforeMakeWorks = ['groupLess'];
+        break;
+    default:
+        beforeMakeWorks = ['groupGrace'];
+        break;
+}
+gulp.task('make', beforeMakeWorks);
 
 // 监控文件改动实现浏览器自动刷新任务
 // proxy server
@@ -507,7 +640,10 @@ gulp.task('default', ['watch', 'browser-sync']);
 // 开发过程中，对于任务的相关测试，或是调试性写法，尝试等，可以写在这里
 // task action:: test
 gulp.task('test', function () {
-    var t = Date.now();
-    console.log(t);
-    console.log(moment().format('YYYYMMDDHHmmss'))
+    // var t = Date.now();
+    // console.log(t);
+    // console.log(moment().format('YYYYMMDDHHmmss'))
+    gutil.log('stuff happened', 'Really it did', gutil.colors.magenta('123'));
+    gutil.beep();
+    console.log(gutil.env);
 });

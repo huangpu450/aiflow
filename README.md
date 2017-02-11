@@ -95,53 +95,53 @@ www
 ```
 ### 4.2 项目监控任务
 ```
-npm default --pro xxxx
+gulp default --pro xxxx
 // or 
-npm --pro xxxx
+gulp --pro xxxx
 // or
-npm default --sn xxxx
+gulp default --sn xxxx
 // or 
-npm --sn xxxx
+gulp --sn xxxx
 ```
 用于监控项目开发过程中，项目代码的变动，实现实时编译、刷新及浏览器同步，浏览器的同步服务端口号为：3000
 
 ### 4.3 项目编译任务
 ```
-npm make --pro xxxx
+gulp make --pro xxxx
 // or
-npm make --sn xxxx
+gulp make --sn xxxx
 ```
 用于编译开发过程中，模块化样式编写方式时，将各分文件合并，并解析其样式变量等。
 
 ### 4.4 项目发布任务
 ```
-npm dist --pro xxxx
+gulp dist --pro xxxx
 // or 
-npm dist --sn xxxx
+gulp dist --sn xxxx
 ```
 当项目开发完成后，我们模块化开发方式的各文件通过编译及解析，并将相关文件统一打包为ZIP文件，完整输出静态文件，以此来规避发布过程中的犯错机率，以及分发时的方便性快捷性。
 
 ### 4.5 项目归档任务
 ```
-npm archive --pro xxxx
+gulp archive --pro xxxx
 // or
-npm archive --sn xxxx
+gulp archive --sn xxxx
 ```
 在IDE开发工具中，因各项目不断积累，导致IDE工具建立索引过多，而导致工具变慢，归档操作是将相关的项目源码归档到可以设置为忽略建索引的目录（本项目是设置位置为：./archive）。
 
 ### 4.6 项目重加载任务
 ```
-npm reload --pro xxxx
+gulp reload --pro xxxx
 // or
-npm reload --sn xxxx
+gulp reload --sn xxxx
 ```
 这是归档任务的反操作，当我们将某一项目归档处理后，可能后期的某个时间点，我们仍需要处理这个项目，但当前的项目文件已被归档，开发IDE对于它已不工作，因此，这里通过这个任务，重新将已归档的任务重新加载到环境中。
 
 ### 4.7 项目删除任务
 ```
-npm delpro --pro xxxx
+gulp delpro --pro xxxx
 // or
-npm delpro --sn xxxx
+gulp delpro --sn xxxx
 ```
 用于删除某一个项目源码。  
 本操作需要非常小心，除非十分明确，本项目的源码已不再需要，否则请不要执行本任务。本操作的执行结果，会彻底清空该项目的源码，清除后，无法恢复。  
@@ -149,7 +149,7 @@ npm delpro --sn xxxx
 
 ### 4.8 自动化构建工具源码发布任务
 ```
-npm release
+gulp release
 ```
 此时，任务会将当前自动化构建工具源码执行编译打包源码，并使用package.json中的相关配置信息生成相关的版本号等信息命名格式的发布文件。  
 发布所在的目录路径为：   
@@ -206,9 +206,9 @@ src/common/config/aipro.js
 ### 5.2 项目初始化
 在项目根目录下执行
 ```
-npm init --pro sxwt
+gulp init --pro sxwt
 // or
-npm init --sn 2016-SN03
+gulp init --sn 2016-SN03
 ```
 
 ### 5.3 分析面组成
@@ -269,7 +269,7 @@ src/sxwt/config/data.js
 相关的任务
 ```
 // 控监任务 
-npm --pro sxwt
+gulp --pro sxwt
 ```
 
 固有变量说明：

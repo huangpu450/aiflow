@@ -1,0 +1,22 @@
+:root {
+    --font-normal-color: #333;
+    --font-light-color: #666;
+    --font-orange-color: #cca363;
+    --main-color-orange: #EE7500;
+    --main-color-red: #E40077;
+    --main-color-light-red: #facce4;
+    --main-color-blue: #25b2fe;
+    --bg-color-1: #F5F5F5;
+    --bg-color-2: #EFEFEF;
+    --bg-color-3: #e5e5e5;
+    --bg-color-4: #b4b4b4;
+    --bg-color-yellow-1: #fff7ac;
+    --bg-color-yellow-2: #ffff00;
+    --bg-color-banner: #2F1343;
+    --border-color-1: #EFEFEF;
+    --border-color-2: #ff9f65;
+    --border-color-3: #fa5f01;
+    --icon-color-green: #8ec31f;
+    --icon-color-orange: #ff9f65;
+    --img-dir: '../images/'
+}

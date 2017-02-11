@@ -1,0 +1,161 @@
+@import "pro-lib-var.css";
+
+.userinfo-box {
+    width: 300px;
+    height: 280px;
+    position: absolute;
+    right: 0;
+    top: 15px;
+    background-color: var(--bg-color-1);
+    z-index: 9;
+}
+
+.userinfo-box .row_userinfo {
+    padding: 20px 25px 15px;
+    background-color: #fff;
+    clear: fix;
+}
+
+.userinfo-box .img-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    float: left;
+}
+
+.userinfo-box .img-level {
+    height: 24px;
+    width: auto;
+}
+
+.userinfo-box h1 {
+    font-size: 18px;
+    font-weight: normal;
+    text-align: left;
+    padding-left: 15px;
+}
+
+.userinfo-box h2 {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: normal;
+    text-align: center;
+    position: relative;
+    margin-top: 10px;
+}
+
+.userinfo-box h2 img {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    top: 1px;
+    left: 30px;
+}
+
+.userinfo-box h2 b {
+    font-size: 20px;
+    font-weight: normal;
+    color: var(--main-color-red);
+}
+
+.userinfo-box .level_info {
+    font-size: 14px;
+    padding-left: 25px;
+    margin-left: 15px;
+    margin-top: 9px;
+    font-weight: normal;
+    text-align: left;
+    line-height: 26px;
+    vertical-align: middle;
+    position: relative;
+}
+
+.userinfo-box .level_info .img-level {
+    position: absolute;
+    height: 21px;
+    top: 3px;
+    left: 0;
+}
+
+.userinfo-box .level_info_1 {
+    background: url('../images/level_01.png') left center no-repeat;
+    background-size: auto 80%;
+}
+
+.userinfo-box .level_info_2 {
+    background: url('../images/level_02.png') left center no-repeat;
+    background-size: auto 80%;
+}
+
+.userinfo-box .level_info_3 {
+    background: url('../images/level_03.png') left center no-repeat;
+    background-size: auto 80%;
+}
+
+.userinfo-box .level_info_4 {
+    background: url('../images/level_04.png') left center no-repeat;
+    background-size: auto 80%;
+}
+
+.userinfo-box .level_info_5 {
+    background: url('../images/level_05.png') left center no-repeat;
+    background-size: auto 80%;
+}
+
+.userinfo-box .level_info_6 {
+    background: url('../images/level_06.png') left center no-repeat;
+    background-size: auto 80%;
+}
+
+.userinfo-box .level_desc,
+.userinfo-box p {
+    font-size: 12px;
+}
+
+.userinfo-box .level_desc b,
+.userinfo-box p b {
+    font-weight: normal;
+    color: var(--main-color-red);
+}
+
+.userinfo-box .row_qiandao {
+    padding: 5px 25px;
+}
+
+.userinfo-box .row_qiandao h2 {
+    font-weight: bold;
+    margin-top: 0;
+    text-align: left;
+}
+
+.userinfo-box .row_qiandao p {
+    /*text-align: right;*/
+}
+
+.userinfo-box .row_qiandao span {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    border-radius: 50%;
+    background-color: var(--bg-color-4);
+    text-align: center;
+    display: block;
+    color: #fff;
+    margin: 5px auto 0;
+}
+
+.userinfo-box .row_qiandao span.light-red {
+    background-color: var(--main-color-light-red);
+}
+
+.userinfo-box .row_qiandao span.red {
+    background-color: var(--main-color-red);
+}
+
+.userinfo-box .row_qiandao i {
+    height: 36px;
+    line-height: 50px;
+    display: block;
+    text-align: center;
+    color: var(--bg-color-4);
+}
