@@ -1,0 +1,49 @@
+<!--
+ * the nav part
+ * 
+ * @author: yunzhi li
+ * @version: 2016/9/28 21:58
+ *           Id
+-->
+
+<!-- nav start -->
+<div class="container-fluid">
+    <div class="row row_nav">
+        <div class="col col-12">
+            <div class="row row_nav_con">
+                <div class="col col-6">
+                    <a href="" class="logo_1"><img src="{{proUrl}}/images/logo_2.png"/></a>
+                    <a href="" class="logo_2"><img src="{{proUrl}}/images/logo_1.png"/></a>
+                </div>
+                <div class="col col-6">
+                    <ul class="aiui-menu">
+                        <li class="app-index"><a href="{{proUri}}/index.html">首页</a></li>
+                        <li class="app-fuli dropdown">
+                            <a href="{{proUri}}/fuli.html">E币福利<i class="iconfont icon-down">&#xe616;</i></a>
+                            <ul class="aiui-dropdown-menu">
+                                <li><a href="">E币兑换</a></li>
+                                <li><a href="">我的E币</a></li>
+                                <li><a href="">E币介绍</a></li>
+                            </ul>
+                        </li>
+                        <li class="app-tequan dropdown">
+                            <a href="">专属特权<i class="iconfont icon-down">&#xe616;</i></a>
+                            <ul class="aiui-dropdown-menu">
+                                <li><a href="">专属特价</a></li>
+                                <li><a href="">特权介绍</a></li>
+                                <li><a href="">我的经验值</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        var currLi = 'app-{{data.curr}}';
+        $('.' + currLi).addClass('curr');
+    })
+</script>
+<!-- nav end -->

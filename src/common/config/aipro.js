@@ -1,3 +1,4 @@
+'use strict';
 /**
  * the config of the asiainfo project list
  *
@@ -70,24 +71,6 @@ export default {
             dev: 'phone',
             date: '2016-10-26',
             remUnit: 75,
-            svn: ''
-        }, {
-            sn: '2016-PP001',
-            name: 'gongwu',
-            title: '共武文化',
-            type: 'web',
-            dev: 'pc',
-            date: '2016-10-19',
-            remUnit: 20,
-            svn: ''
-        }, {
-            sn: '2016-PP002',
-            name: 'sanxiangdl',
-            title: '三湘电力',
-            type: 'web',
-            dev: 'pc',
-            date: '2016-10-24',
-            remUnit: 20,
             svn: ''
         }
     ]

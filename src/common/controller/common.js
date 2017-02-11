@@ -61,6 +61,14 @@ export default class extends think.controller.base {
         return rs;
     }
 
+    /**
+     * use empty action to make the display action easy
+     * @returns {PreventPromise}
+     * @private
+     */
+    __call() {
+        return this.display('app/' + this.http.action);
+    }
 
 }
 

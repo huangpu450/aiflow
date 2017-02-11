@@ -22,6 +22,10 @@ import moment from 'moment';
 import browserS from 'browser-sync';
 var browserSync = browserS.create();
 
+// 引入执行终端命令库
+import cmd from 'child_process';
+var exec = cmd.exec;
+
 // 处理CSS
 import postcss from 'gulp-postcss';
 import autoprefixer from 'autoprefixer';
@@ -132,6 +136,12 @@ switch (gulpAction) {
         checkProParam();
         printProHead();
         break;
+    case 'delpro':
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目删除');
+        checkProParam();
+        printProHead();
+        break;
     case 'reload':
         console.log('==================================================================');
         console.log('-- ' + proName + ' 项目重加载');
@@ -191,7 +201,8 @@ gulp.task('copy', ['clean'], function () {
     return merge(lib, img, js);
 });
 
-// 项目归档
+// 项目归档，将已开发完成的项目归档到对应的文件夹中
+// task action:: archive
 var archiveFileArr = [proSrcDir + '/**/*', proViewDir + '/**/*', proWwwDir + '/**/*'];
 var archiveDirArr = [proSrcDir, proViewDir, proWwwDir];
 gulp.task('archive:copy', function () {
@@ -208,7 +219,15 @@ gulp.task('archive:del', ['archive:copy'], function () {
 
 gulp.task('archive', ['archive:del']);
 
-// 项目重新加载
+// 删除项目源码，请注意，本操作有风险，删除后无法找回
+var proDirArr = [proSrcDir, proViewDir, proWwwDir];
+// task action:: delpro
+gulp.task('delpro', function () {
+    del(proDirArr);
+});
+
+// 项目重新加载，项目归档操作的反操作。将已归档的项目源码，重新加载到开发环境中，便于持续开发。
+// task action:: reload
 gulp.task('reload', function () {
     return gulp.src(
         [proArchiveDir + '/**/*'], {
@@ -300,6 +319,7 @@ gulp.task('grace', ['concat'], function () {
 });
 
 // 项目编译任务，包括CSS、JS等
+// task action:: make
 gulp.task('make', ['grace']);
 
 // 监控文件改动实现浏览器自动刷新任务
@@ -328,10 +348,6 @@ gulp.task('browser-sync', function () {
 gulp.task('watch', ['make'], function () {
     gulp.watch(srcDir + '/css/src/*.css', ['grace']);
 });
-
-// 引入执行终端命令库
-import cmd from 'child_process';
-var exec = cmd.exec;
 
 // the init task
 gulp.task('initdir', function () {
@@ -397,6 +413,7 @@ gulp.task('initdir', function () {
 });
 
 // 初始化，创建目录结构后，复制基本文件
+// task action:: init
 gulp.task('init', ['initdir'], function () {
     var src = gulp.src(initSrcDir + '/**/*')
         .pipe(gulp.dest(proSrcDir + '/'));
@@ -407,7 +424,8 @@ gulp.task('init', ['initdir'], function () {
     return merge(src, view, www);
 });
 
-// the dist task
+// 项目发布任务，发布到指定的文件夹，以及打包压缩
+// task action:: dist
 gulp.task('dist', ['copy', 'css'], function () {
     var distRs = exec('node www/development.js ' + proName + '/app/make');
     var timeStr = moment().format('YYYYMMDDHHmmss');
@@ -427,6 +445,8 @@ gulp.task('dist', ['copy', 'css'], function () {
 });
 
 // the task of release framework
+// 用于发布自动化框架构建源码
+// task action:: release
 gulp.task('release', function () {
     var timeStr = moment().format('YYYYMMDDHHmmss');
     var ver = packageConf.version;
@@ -479,9 +499,13 @@ gulp.task('release', function () {
 });
 
 // the default task
+// 默认任务，用户于监控文件的变动，并对变动的文件实时编译，同时刷新所有浏览器终端
+// task action:: default
 gulp.task('default', ['watch', 'browser-sync']);
 
 // the test task
+// 开发过程中，对于任务的相关测试，或是调试性写法，尝试等，可以写在这里
+// task action:: test
 gulp.task('test', function () {
     var t = Date.now();
     console.log(t);

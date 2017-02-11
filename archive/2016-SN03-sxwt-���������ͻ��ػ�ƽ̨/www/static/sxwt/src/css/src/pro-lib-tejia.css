@@ -1,0 +1,9 @@
+@import "./pro-lib-var.css";
+
+.row.row_tejia {
+    width: 1200px;
+    margin: 20px auto 0;
+    clear: fix;
+}
+
+
