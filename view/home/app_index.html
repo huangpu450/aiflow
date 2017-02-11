@@ -50,17 +50,27 @@
 
         .proList .proLink {
             float: left;
-            width: 400px;
+            width: 300px;
         }
 
-        .proList .proType {
+        .proList .proType, .proList .proDate {
             float: left;
-            width: 80px;
+            width: 90px;
         }
 
         .proList .proDist {
             float: left;
-            width: 60px;
+            width: 80px;
+        }
+
+        .proList .proArch {
+            float: left;
+            width: 400px;
+        }
+
+        .proList .proA {
+            float: left;
+            width: 100px;
         }
     </style>
 </head>
@@ -73,14 +83,18 @@
         <span class="proSn">项目编号</span>
         <span class="proLink">项目名称</span>
         <span class="proType">项目类型</span>
+        <span class="proDate">立项日期</span>
         <span class="proDist">项目发布</span>
+        <span class="proArch">项目归档</span>
     </li>
     {% for pro in proList.pro %}
     <li>
         <span class="proSn">{{pro.sn | upper}}</span>
         <a class="proLink" href="/{{pro.name}}" target="_blank">{{ pro.title }}</a>
         <span class="proType">{{pro.type}}</span>
-        <a class="proLink" href="/static/{{pro.name}}/dist/index.html" target="_blank">查看发布</a>
+        <span class="proDate">{{pro.date}}</span>
+        <a class="proDist" href="/static/{{pro.name}}/dist/index.html" target="_blank">查看发布</a>
+        <span class="proArch">{{baseDir}}/{{pro.sn}}-{{pro.name}}-{{pro.title}}/www/static/{{pro.name}}/dist/index.html</span>
     </li>
     {% endfor %}
 </ul>

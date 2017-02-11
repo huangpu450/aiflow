@@ -4,6 +4,6 @@
  */
 export default {
     //key: value
-    port: 8088,
+    port: 1234,
     default_controller: "app"
 };

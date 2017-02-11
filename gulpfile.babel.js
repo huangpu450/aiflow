@@ -7,6 +7,7 @@
  */
 // 项目配置信息
 import proList from './src/common/config/aipro';
+import packageConf from './package.json';
 
 // 任务流程库引入
 import gulp from 'gulp';
@@ -16,22 +17,37 @@ import vinyPaths from 'vinyl-paths';
 import concat from 'gulp-concat';
 import fs from 'fs';
 import plumber from 'gulp-plumber';
+import zip from 'gulp-zip';
+import moment from 'moment';
 import browserS from 'browser-sync';
 var browserSync = browserS.create();
+
+// 处理CSS
+import postcss from 'gulp-postcss';
+import autoprefixer from 'autoprefixer';
+import cssgrace from 'cssgrace';
+import cssnext from 'cssnext';
+import cssnano from 'cssnano';
+import cssimport from 'postcss-import';
+import cusmedia from 'postcss-custom-media';
+import csscalc from 'postcss-calc';
+import px2rem from 'postcss-px2rem';
+import cssrmcomments from 'postcss-discard-comments';
 
 // 接收任务参数
 // 项目序列号
 var proSn = gulp.env.sn ? gulp.env.sn : '';
 // 项目名称、标题、支持设备类型
-var proName, proTitle, deviceType;
+var proName, proTitle, deviceType, remUnit;
 if (proSn === '') {
     // 传入项目名称方式执行任务
-    proName = gulp.env.pro ? gulp.env.pro : 'sxwt';
+    proName = gulp.env.pro ? gulp.env.pro : '';
     for (let pro of proList.pro) {
         if (pro.name === proName) {
             proSn = pro.sn;
             proTitle = pro.title;
             deviceType = pro.dev;
+            remUnit = pro.remUnit;
             break;
         }
     }
@@ -42,35 +58,112 @@ if (proSn === '') {
             proName = pro.name;
             proTitle = pro.title;
             deviceType = pro.dev;
+            remUnit = pro.remUnit;
             break;
         }
     }
 }
 
-// 显示项目基础信息
-console.log('-------------------------------------------');
-console.log('-- Gulp task params');
-console.log('-------------------------------------------');
-console.log('Project title:: ' + proTitle);
-console.log('Project SN:: ' + proSn);
-console.log('Project Name:: ' + proName);
-console.log('Device Type:: ' + deviceType);
-console.log('-------------------------------------------');
-
 // 定义项目相关路径常量
+const rootDir = './';
 const logicDir = 'src';
 const viewDir = 'view';
 const wwwDir = 'www';
+const archiveDir = 'archive';
 const srcDir = wwwDir + '/static/' + proName + '/src';
 const distDir = wwwDir + '/static/' + proName + '/dist';
+const proSrcDir = logicDir + '/' + proName;
+const proViewDir = viewDir + '/' + proName;
+const proWwwDir = wwwDir + '/static/' + proName;
+const proArchiveDir = archiveDir + '/' + proSn + '-' + proName + '-' + proTitle;
+const initSrcDir = logicDir + '/init';
+const initViewDir = viewDir + '/init';
+const initWwwDir = wwwDir + '/static/init';
 
-// 判断项目名称是否正确
-if (gulp.env._[0] !== 'init') {
-    var proExist = fs.existsSync(srcDir);
-    if (!proExist) {
-        console.log('The project name is error, please check!');
+/**
+ * 打印项目任务参数信息
+ */
+function printProHead() {
+    // 显示项目基础信息
+    console.log('------------------------------------------------------------------');
+    console.log('-- Gulp task params');
+    console.log('------------------------------------------------------------------');
+    console.log('Project title:: ' + proTitle);
+    console.log('Project SN:: ' + proSn);
+    console.log('Project Name:: ' + proName);
+    console.log('Device Type:: ' + deviceType);
+    console.log('------------------------------------------------------------------');
+}
+
+/**
+ * 检查项目参数是否正确
+ */
+function checkProParam() {
+    if (proName === '' || proSn === '') {
+        console.log('ERR:: The project param is error, or the project config is gone, please check!');
         process.exit();
     }
+}
+
+/**
+ * 检查项目目录是否存在
+ */
+function checkProDir() {
+    var proExist = fs.existsSync(srcDir);
+    if (!proExist) {
+        console.log('ERR:: The project name is error, please check!');
+        process.exit();
+    }
+}
+
+const gulpAction = gulp.env._[0];
+
+// 判断任务参数是否正确，如：项目名称
+switch (gulpAction) {
+    case 'init':
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目初始化');
+        checkProParam();
+        printProHead();
+        break;
+    case 'archive':
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目归档');
+        checkProParam();
+        printProHead();
+        break;
+    case 'reload':
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目重加载');
+        checkProParam();
+        printProHead();
+        break;
+    case 'release':
+        console.log('==================================================================');
+        console.log('-- ' + packageConf.name + ' 打包自动发布 v' + packageConf.version + ' 版');
+        console.log('------------------------------------------------------------------');
+        break;
+    case 'make':
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目编译');
+        checkProParam();
+        checkProDir();
+        printProHead();
+        break;
+    case 'dist':
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目发布');
+        checkProParam();
+        checkProDir();
+        printProHead();
+        break;
+    default :
+        console.log('==================================================================');
+        console.log('-- ' + proName + ' 项目自动监控');
+        checkProParam();
+        checkProDir();
+        printProHead();
+        break;
 }
 
 // 清除原有目录
@@ -98,19 +191,31 @@ gulp.task('copy', ['clean'], function () {
     return merge(lib, img, js);
 });
 
-// 处理CSS
-import postcss from 'gulp-postcss';
-import autoprefixer from 'autoprefixer';
-import cssgrace from 'cssgrace';
-import cssnext from 'cssnext';
-import cssnano from 'cssnano';
-import cssimport from 'postcss-import';
-import cusmedia from 'postcss-custom-media';
-import csscalc from 'postcss-calc';
-import px2rem from 'postcss-px2rem';
-import cssrmcomments from 'postcss-discard-comments';
-// 项目打包库
-import zip from 'gulp-zip';
+// 项目归档
+var archiveFileArr = [proSrcDir + '/**/*', proViewDir + '/**/*', proWwwDir + '/**/*'];
+var archiveDirArr = [proSrcDir, proViewDir, proWwwDir];
+gulp.task('archive:copy', function () {
+    return gulp.src(
+        archiveFileArr, {
+            base: './'
+        }
+    ).pipe(gulp.dest(proArchiveDir));
+});
+
+gulp.task('archive:del', ['archive:copy'], function () {
+    del(archiveDirArr);
+});
+
+gulp.task('archive', ['archive:del']);
+
+// 项目重新加载
+gulp.task('reload', function () {
+    return gulp.src(
+        [proArchiveDir + '/**/*'], {
+            base: proArchiveDir
+        }
+    ).pipe(gulp.dest('./'));
+});
 
 // CSS压缩处理配置
 var distProcessors = [
@@ -158,7 +263,7 @@ switch (deviceType) {
 
         devProcessors_grace = [
             cssgrace,
-            px2rem({remUnit: 20}),
+            px2rem({remUnit: remUnit}),
         ];
         break;
 }
@@ -178,7 +283,7 @@ var srcArr = [
 
 // the task for concat css into comm.css
 gulp.task('concat', function () {
-    console.log('-------------------------------------------');
+    console.log('------------------------------------------------------------------');
     return gulp.src(srcArr)
         .pipe(plumber())
         .pipe(postcss(devProcessors_concat))
@@ -193,6 +298,9 @@ gulp.task('grace', ['concat'], function () {
         .pipe(postcss(devProcessors_grace))
         .pipe(gulp.dest(srcDir + '/css'));
 });
+
+// 项目编译任务，包括CSS、JS等
+gulp.task('make', ['grace']);
 
 // 监控文件改动实现浏览器自动刷新任务
 // proxy server
@@ -217,7 +325,7 @@ gulp.task('browser-sync', function () {
 });
 
 // 监控CSS变化
-gulp.task('watch', ['grace'], function () {
+gulp.task('watch', ['make'], function () {
     gulp.watch(srcDir + '/css/src/*.css', ['grace']);
 });
 
@@ -226,7 +334,7 @@ import cmd from 'child_process';
 var exec = cmd.exec;
 
 // the init task
-gulp.task('init', function () {
+gulp.task('initdir', function () {
     let tagFile = proSn + '.' + proTitle;
     let initDir = [
         // 初始化时的逻辑层代码路径结构
@@ -288,18 +396,82 @@ gulp.task('init', function () {
     }
 });
 
+// 初始化，创建目录结构后，复制基本文件
+gulp.task('init', ['initdir'], function () {
+    var src = gulp.src(initSrcDir + '/**/*')
+        .pipe(gulp.dest(proSrcDir + '/'));
+    var view = gulp.src(initViewDir + '/**/*')
+        .pipe(gulp.dest(proViewDir + '/'));
+    var www = gulp.src(initWwwDir + '/**/*')
+        .pipe(gulp.dest(proWwwDir + '/'));
+    return merge(src, view, www);
+});
+
 // the dist task
 gulp.task('dist', ['copy', 'css'], function () {
     var distRs = exec('node www/development.js ' + proName + '/app/make');
+    var timeStr = moment().format('YYYYMMDDHHmmss');
     distRs.stdout.on('data', function (data) {
-        console.log('-------------------------------------------');
+        console.log('------------------------------------------------------------------');
         console.log('-- Dist result data');
-        console.log('-------------------------------------------');
+        console.log('------------------------------------------------------------------');
         console.log('-- ' + data);
         // make zip file
         gulp.src(distDir + '/**/*.*')
-            .pipe(zip(proSn + '.' + proTitle + '.zip'))
+            .pipe(zip(proSn + '.' + proTitle + '-' + timeStr + '.zip'))
             .pipe(gulp.dest(distDir))
+            .on('end', function () {
+                process.exit();
+            });
+    });
+});
+
+// the task of release framework
+gulp.task('release', function () {
+    var timeStr = moment().format('YYYYMMDDHHmmss');
+    var ver = packageConf.version;
+    var subName = packageConf.subname;
+    var releaseRootDir = rootDir + 'releases';
+    var releaseDir = rootDir + 'releases/' + ver;
+    var releaseName = subName + '-' + ver + '-';
+    var releaseZipName = releaseName + timeStr + '.zip';
+
+    var releaseSource = [
+        rootDir + '/*.*',
+        rootDir + '/archive',
+        rootDir + '/releases',
+
+        logicDir + '/common/**/*.*',
+        logicDir + '/home/**/*.*',
+        logicDir + '/init/**/*.*',
+
+        viewDir + '/common/**/*.*',
+        viewDir + '/home/**/*.*',
+        viewDir + '/init/**/*.*',
+
+        wwwDir + '/*.*',
+        wwwDir + '/commLib/**/*.*',
+        wwwDir + '/static/init/**/*.*',
+    ];
+
+    // step 1
+    // create file and directory
+    if (!fs.existsSync(releaseDir)) {
+        fs.mkdirSync(releaseDir, '0755');
+    } else {
+        del([releaseDir + '/*', releaseRootDir + '/' + releaseName + '*']);
+    }
+
+    // step 2
+    // copy source files to the release directory
+    gulp.src(releaseSource, {
+        base: './'
+    }).pipe(gulp.dest(releaseDir)).on('end', function () {
+        // step 3
+        // zip the releases
+        gulp.src(releaseDir + '/**/*.*')
+            .pipe(zip(releaseZipName))
+            .pipe(gulp.dest(releaseRootDir))
             .on('end', function () {
                 process.exit();
             });
@@ -308,3 +480,10 @@ gulp.task('dist', ['copy', 'css'], function () {
 
 // the default task
 gulp.task('default', ['watch', 'browser-sync']);
+
+// the test task
+gulp.task('test', function () {
+    var t = Date.now();
+    console.log(t);
+    console.log(moment().format('YYYYMMDDHHmmss'))
+});

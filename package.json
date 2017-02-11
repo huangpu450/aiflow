@@ -1,7 +1,8 @@
 {
-  "name": "aui",
-  "description": "asiainfo ui auto frame",
-  "version": "0.0.1",
+  "name": "aiui-automation-framework",
+  "subname": "aiui-frame",
+  "description": "asiainfo ui automation framework",
+  "version": "0.0.2",
   "scripts": {
     "start": "node www/development.js",
     "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/ --source-maps",
@@ -38,6 +39,7 @@
     "gulp-postcss": "^6.2.0",
     "gulp-zip": "^3.2.0",
     "merge-stream": "^1.0.0",
+    "moment": "^2.15.1",
     "postcss": "^5.2.2",
     "postcss-calc": "^5.3.1",
     "postcss-custom-media": "^5.0.1",

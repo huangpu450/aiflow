@@ -1,0 +1,23 @@
+/* AIUI Grid */
+@import "./grid-lib-grid.css";
+@import "./grid-lib-sm-grid.css";
+@import "./grid-lib-md-grid.css";
+@import "./grid-lib-lg-grid.css";
+
+@custom-media --breakpoint-sm (min-width: 768px);
+@custom-media --breakpoint-md (min-width: 992px);
+@custom-media --breakpoint-lg (min-width: 1200px);
+
+.container-fluid {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    clear: fix;
+}
+
+:root {
+    --breakpoint-sm: '768px';
+    --breakpoint-md: '992px';
+    --breakpoint-lg: '1200px';
+}
