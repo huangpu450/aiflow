@@ -24,14 +24,14 @@ coverage/
 node_modules/
 
 # IDE config
-.idea
+/.idea
 
 # output
 output/
 output.tar.gz
 
-app/
+/app/
 
 runtime/
 
-archive/**/*.*
+/archive/*
