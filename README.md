@@ -23,8 +23,14 @@ port: 1234
 服务启动后，即可通过: [localhost:1234](http://localhost:1234) 访问
 
 ### 3.2 项目配置
-路径：
-src/common/config/aipro.js
+路径：  
+// 系统初始项目配置  
+src/common/config/initpro.js  
+// 以 aipro 为前缀命名  
+src/common/config/aiproxxxx.js  
+// 如：  
+src/common/config/aipro_liyz.js  
+...
 ```
 export default {
     'pro': [
@@ -307,7 +313,7 @@ SVN地址：
 ```
 项目配置文件路径：
 ```
-src/common/config/aipro.js
+src/common/config/aipro_liyz.js
 ```
 配置信息
 ```

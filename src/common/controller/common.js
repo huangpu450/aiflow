@@ -7,6 +7,7 @@
  */
 
 'use strict';
+import  nodeUnique from 'node-unique-array';
 
 export default class extends think.controller.base {
     /**
@@ -50,7 +51,25 @@ export default class extends think.controller.base {
      * @returns {*}
      */
     getProConfig(conditionK, conditionV) {
-        let proConfList = think.config('aipro');
+        let confPref = think.config('pro_conf_pref');
+        let proConfList = think.config('initpro');
+        let allConf = think.config();
+        let proArr = new nodeUnique();
+        proArr.add(proConfList.pro);
+        for (let conf in allConf) {
+            if (conf.indexOf(confPref) == 0) {
+                for (let pro of allConf[conf].pro) {
+                    if (proArr.contains(pro)) {
+                        proArr.remove(pro);
+                    }
+                    proArr.add(pro);
+                }
+            }
+        }
+        proConfList.pro = proArr.get();
+        // proConfList.pro = this.assign(proConfList.pro, 'sn');
+        // console.log(proConfList.pro);
+        // process.exit();
         let rs = false;
         for (let pro of proConfList.pro) {
             if (pro[conditionK] === conditionV) {
@@ -59,6 +78,38 @@ export default class extends think.controller.base {
             }
         }
         return rs;
+    }
+
+    /**
+     * 数组去重
+     *
+     * @param arr
+     * @param key
+     * @returns {*}
+     */
+    arrUnique(arr, key) {
+        let n = [arr[0]];
+        for (let i = 1; i < arr.length; i++) {
+            if (key === undefined) {
+                if (n.indexOf(arr[i]) == -1) n.push(arr[i]);
+            } else {
+                let has = false;
+                inner: {
+                    for (let j = 0; j < n.length; j++) {
+                        if (arr[i][key] == n[j][key]) {
+                            has = true;
+                            // 使用靠后的值作为新值
+                            n[j] = arr[i];
+                            break inner;
+                        }
+                    }
+                }
+                if (!has) {
+                    n.push(arr[i]);
+                }
+            }
+        }
+        return n;
     }
 
     /**

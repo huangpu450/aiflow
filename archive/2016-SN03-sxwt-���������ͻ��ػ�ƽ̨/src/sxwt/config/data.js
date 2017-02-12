@@ -20,7 +20,7 @@ export default {
                     level: 6,
                     levelName: '高手',
                     levelImg: '/images/level_06.png',
-                    eNum: 388,
+                    eNum: 488,
                     curIntegral: 3001,
                     nextLevelIntegral: 4000
                 },

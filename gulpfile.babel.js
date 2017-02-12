@@ -12,6 +12,7 @@ import merge from 'merge-stream';
 import vinyPaths from 'vinyl-paths';
 import concat from 'gulp-concat';
 import fs from 'fs';
+import path from 'path';
 import plumber from 'gulp-plumber';
 import zip from 'gulp-zip';
 import gutil from 'gulp-util';
@@ -55,13 +56,35 @@ Array.prototype.unique = function (key) {
 // 项目配置信息
 import packageConf from './package.json';
 import initList from './src/common/config/initpro';
-const aiproConfPath = './src/common/config/aipro.js';
+import appConfig from './src/common/config/config';
+const aiproConfPath = './src/common/config';
+const aiproConfPre = appConfig.pro_conf_pref; //aipro
 let proList = {};
 proList.pro = [];
 try {
+    // 装入初始化项目配置文件
+    proArr.add(initList.pro);
+
     let aiProInfo = fs.statSync(aiproConfPath);
-    if (aiProInfo.isFile()) {
-        proArr.add(initList.pro);
+    if (aiProInfo.isDirectory()) {
+        let tempFiles = fs.readdirSync(aiproConfPath);
+        tempFiles.forEach(function (fileName, k) {
+            // 判断是否为项目配置前缀
+            if (fileName.indexOf(aiproConfPre) == 0) {
+                let tmpPath = path.join(aiproConfPath, fileName);
+                if (fs.statSync(tmpPath).isFile()) {
+                    // 使用 require 语法时，路径必须带 ./
+                    let aiList = require('./' + tmpPath).default;
+                    for (let pro of aiList.pro) {
+                        if (proArr.contains(pro)) {
+                            proArr.remove(pro);
+                        }
+                        proArr.add(pro);
+                    }
+                }
+            }
+        });
+    } else if (aiProInfo.isFile()) {
         let aiList = require(aiproConfPath).default;
         for (let pro of aiList.pro) {
             if (proArr.contains(pro)) {
@@ -71,7 +94,6 @@ try {
         }
     }
 } catch (err) {
-    proArr.add(initList.pro);
     // console.log(err);
 }
 proList.pro = proArr.get();
@@ -462,7 +484,13 @@ function getDevProcessorsGraceConf(devType) {
 // CSS编译任务
 gulp.task('css', function () {
     return gulp.src(srcDir + '/css/*.css')
-        .pipe(plumber())
+        .pipe(plumber({
+            errorHandler: function (err) {
+                gutil.log(err);
+                // 表示调用已结束，否则数据无法进入下一个 pipe操作
+                this.emit('end');
+            }
+        }))
         .pipe(postcss(distProcessors))
         .pipe(gulp.dest(distDir + '/css'));
 });
@@ -504,7 +532,13 @@ let lessSrc = {
 gulp.task('concat', function () {
     console.log('------------------------------------------------------------------');
     return gulp.src(cssArr)
-        .pipe(plumber())
+        .pipe(plumber({
+            errorHandler: function (err) {
+                gutil.log(err);
+                // 表示调用已结束，否则数据无法进入下一个 pipe操作
+                this.emit('end');
+            }
+        }))
         .pipe(postcss(devProcessors_concat))
         .pipe(concat('comm.css'))
         .pipe(gulp.dest(srcDir + '/css'));
@@ -513,7 +547,13 @@ gulp.task('concat', function () {
 // LESS编译任务
 gulp.task('less', function () {
     return gulp.src(lessArr)
-        .pipe(plumber())
+        .pipe(plumber({
+            errorHandler: function (err) {
+                gutil.log(err);
+                // 表示调用已结束，否则数据无法进入下一个 pipe操作
+                this.emit('end');
+            }
+        }))
         .pipe(sourcemaps.init())
         .pipe(less())
         .pipe(sourcemaps.write())
@@ -526,24 +566,39 @@ gulp.task('less', function () {
 // the task for group concat css into every on file
 gulp.task('groupConcat', groupFiles(cssSrc, function (name, files) {
     return gulp.src(files)
-        .pipe(plumber())
+        .pipe(plumber({
+            errorHandler: function (err) {
+                gutil.log(err);
+                // 表示调用已结束，否则数据无法进入下一个 pipe操作
+                this.emit('end');
+            }
+        }))
         .pipe(postcss(devProcessors_concat))
         .pipe(concat(name + '.css'))
         .pipe(gulp.dest(srcDir + '/css'));
 }));
 
 // group compile the less files
-gulp.task('groupLess', groupFiles(lessSrc, function (name, files) {
-    return gulp.src(files)
-        .pipe(plumber())
-        .pipe(sourcemaps.init())
-        .pipe(less())
-        .pipe(sourcemaps.write())
-        // concat
-        .pipe(postcss(devProcessors_concat))
-        .pipe(concat(name + '.css'))
-        .pipe(gulp.dest(srcDir + '/css'));
-}));
+gulp.task('groupLess',
+    groupFiles(lessSrc, function (name, files) {
+            return gulp.src(files)
+                .pipe(plumber({
+                    errorHandler: function (err) {
+                        gutil.log(err);
+                        // 表示调用已结束，否则数据无法进入下一个 pipe操作
+                        this.emit('end');
+                    }
+                }))
+                .pipe(sourcemaps.init())
+                .pipe(less())
+                .pipe(sourcemaps.write())
+                // concat
+                .pipe(postcss(devProcessors_concat))
+                .pipe(concat(name + '.css'))
+                .pipe(gulp.dest(srcDir + '/css'));
+        }
+    )
+);
 
 let cssConcatSrc = {
     'comm': [
@@ -560,7 +615,13 @@ let cssConcatSrc = {
 // the task of grace css
 gulp.task('grace', ['concat'], function () {
     return gulp.src(srcDir + '/css/comm.css')
-        .pipe(plumber())
+        .pipe(plumber({
+            errorHandler: function (err) {
+                gutil.log(err);
+                // 表示调用已结束，否则数据无法进入下一个 pipe操作
+                this.emit('end');
+            }
+        }))
         .pipe(postcss(devProcessors_grace))
         .pipe(gulp.dest(srcDir + '/css'));
 });
@@ -580,7 +641,13 @@ switch (compileCssType) {
 }
 gulp.task('groupGrace', beforeGraceWorks, groupFiles(cssConcatSrc, function (name, files) {
     return gulp.src(files)
-        .pipe(plumber())
+        .pipe(plumber({
+            errorHandler: function (err) {
+                gutil.log(err);
+                // 表示调用已结束，否则数据无法进入下一个 pipe操作
+                this.emit('end');
+            }
+        }))
         .pipe(postcss(getDevProcessorsGraceConf(name)))
         .pipe(gulp.dest(srcDir + '/css'));
 }));
@@ -619,7 +686,9 @@ gulp.task('watch', ['make'], function () {
             srcDir + '/css/less/*.less',
             srcDir + '/css/less/**/*.less'
         ],
-        ['groupGrace']
+        ['groupGrace']).on('change', function (event) {
+            console.log('-- File:: ' + event.path + ' was ' + event.type + ', running tasks...');
+        }
     );
 });
 
