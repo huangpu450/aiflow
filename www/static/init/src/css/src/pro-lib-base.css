@@ -1,0 +1,21 @@
+@import "pro-lib-var.css";
+
+body {
+    background-color: var(--bg-color-main);
+    text-align: left;
+    margin: 0 auto;
+    font: 14px/1.5 \5FAE\8F6F\96C5\9ED1, \5B8B\4F53, Verdana, Arial, Helvetica, sans-serif;
+    color: var(--font-color-normal);
+}
+
+.clearfix {
+    clear: fix;
+}
+
+.container-fluid {
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    clear: fix;
+}

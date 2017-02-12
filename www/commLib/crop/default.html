@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<!-- META FOR IOS & HANDHELD -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<meta name="HandheldFriendly" content="true" />
+	<meta name="apple-mobile-web-app-capable" content="YES" />
+	<!-- //META FOR IOS & HANDHELD -->
+	<title>html5手机上传图片尺寸裁剪代码-科蚁网</title>
+    <meta name="keywords" content="网站模板,网站源码,HTML5素材,网页特效,建站素材，高端模板,js特效,jquery, 站长论坛, 源码论坛,手机网站,响应式网站" />
+<meta name="description" content="
+科蚁网（www.ke01.com）是一个专业提供HTML5模板、HTML5建站资源、高端模板、手机网站、响应式网站、jquery特效，HTML5教程等各种HTML5建站素材分享交流社区，致力于打造成为HTML5原创、分享、交流、学习的生态圈。" />
+	<link href="/assets/css/style.css" rel="stylesheet" media="all">
+	<script src="/assets/js/jquery.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script>
+    jQuery(document).ready(function($) {
+        // jBar Script by Todd Motto
+        $('.jquery-arrow').delay(1000).fadeIn(400).addClass('up');
+        $('.jquery-bar').hide().delay(2500).slideDown(400);
+        $('.jquery-arrow').click(function(){
+            $('.jquery-arrow').toggleClass('up', 400);          
+            $('.jquery-bar').slideToggle();
+        });     
+    });
+</script>
+</head>
+
+<body>
+<div class="jquery-arrow down"><i class="fa fa-angle-down"></i></div>
+	<div id="container">
+		<ul id="switcher">
+			<li class="branding">
+				<div class="logo">
+					<a href="http://www.ke01.com"></a>
+				</div>
+			</li>
+
+			<li class="extensions">
+				<ul>
+					<li class="bold-item">
+						<a href="javascript:void(0);"><span class="hide">科蚁网HTML5资源分享</span><span class="sprite menu-icon"></span></a>
+						<div class="dropdown cols ext">
+									<div class="col col-1">
+										<h3 class="group-title"><a href="http://www.ke01.com/forum-57-1.html" title="HTML5网站源码" target="_blank">html5手机网站</a></h3>
+										<ul class="items megamenu-specific">
+										<li><a href="http://www.ke01.com/sort-57-8-1.html" title="手机网站模板" target="_blank">手机网站模板<span class="label update">热门</span></a></li>
+										<li><a href="http://www.ke01.com/sort-57-11-1.html" title="手机场景应用" target="_blank">手机场景应用</a></li>
+                                        <li><a href="http://www.ke01.com/forum-60-1.html" title="HTML5手机建站系统" target="_blank">KEYICMS(手机建站系统)</a></li>	
+										</ul>
+                                        <h3 class="group-title">HTML5网站模板</h3>
+										<ul class="items megamenu-specific">
+										<li><a href="http://www.ke01.com/sort-44-12-1.html" title="HTML5响应式网站模板" target="_blank">HTML5响应式网站模板</a></li>
+										<li><a href="http://www.ke01.com/cmsmuban" title="精品CMS模板" target="_blank">精品CMS模板</a></li>
+                                        <li><a href="http://www.ke01.com/sort-44-14-1.html" title="HTML5后台模板" target="_blank">HTML5后台模板</a></li>	
+										<li><a href="http://www.ke01.com/sort-44-15-1.html" title="HTML5 PC模板" target="_blank">HTML5 PC模板</a></li>
+										<li><a href="http://www.ke01.com/sort-44-16-1.html" title="其他模板" target="_blank">其他HTML5模板</a></li>
+										</ul>
+                                        
+									</div>
+                                    
+									<div class="col col-2">
+										<h3 class="group-title">jQuery/js插件</h3>
+										<ul class="items slider">
+				<li><a href="http://www.ke01.com/sort-53-18-1.html" title="焦点图/幻灯片" target="_blank">焦点/幻灯</a></li>
+                 <li><a href="http://www.ke01.com/sort-53-19-1.html" title="图片特效/相册代码/媒体特效" target="_blank">图片/相册/媒体</a></li>
+                  <li><a href="http://www.ke01.com/sort-53-20-1.html" title="导航菜单" target="_blank">导航菜单</a></li>
+                   <li><a href="http://www.ke01.com/sort-53-23-1.html" title="客服代码" target="_blank">客服代码</a></li>
+                  <li><a href="http://www.ke01.com/sort-53-22-1.html" title="选项卡" target="_blank">选项卡</a></li>
+                   <li><a href="http://www.ke01.com/sort-53-21-1.html" title="弹出提示" target="_blank">弹出提示</a></li>
+                    <li><a href="http://www.ke01.com/sort-53-24-1.html" title="时间日期/表单" target="_blank">时间日期/表单</a></li>
+                     <li><a href="http://www.ke01.com/sort-53-17-1.html" title="评级/图表" target="_blank">评级/图表</a></li>
+                     <li><a href="http://www.ke01.com/sort-53-43-1.html" title="评级/图表" target="_blank">文字特效</a></li>
+                     <li><a href="http://www.ke01.com/sort-53-25-1.html" title="页面加载/返回顶部" target="_blank">加载/返回</a> </li>
+                      <li><a href="http://www.ke01.com/sort-53-26-1.html" title="其他特效" target="_blank">其他特效</a> </li>
+																																	</ul><!-- END .items -->
+									</div>
+									<div class="col col-3">
+										<h3 class="group-title">建站素材/手机交互UI</h3>
+										<ul class="items social">
+				<li><a href="http://www.ke01.com/sort-66-4-1.html" title="手机建站素材" target="_blank">手机建站素材</a></li>
+                 <li><a href="http://www.ke01.com/sort-66-27-1.html" title="PC网站素材" target="_blank">PC网站素材</a></li>
+                  <li><a href="http://www.ke01.com/sort-66-28-1.html" title="APP界面" target="_blank">APP界面</a></li>
+                   <li><a href="http://www.ke01.com/sort-66-29-1.html" title="图标按钮" target="_blank">图标按钮</a></li>
+                   <li><a href="http://www.ke01.com/sort-66-30-1.html" title="软件UI" target="_blank">软件UI</a></li>
+                     <li><a href="http://www.ke01.com/sort-66-31-1.html" title="网页背景" target="_blank">网页背景</a></li>
+                      <li><a href="http://www.ke01.com/sort-66-32-1.html" title="案例应用" target="_blank">案例应用</a></li>
+									</ul>
+									</div>
+									<div class="col col-3">
+										<h3 class="group-title">网站源码/HTML5游戏源码</h3>
+										<ul class="items social">
+										<li><a href="http://www.ke01.com/sort-65-34-1.html" title="HTML5网站源码" target="_blank">HTML5网站源码</a></li>
+                                        <li><a href="http://www.ke01.com/sort-65-35-1.html" title="HTML5游戏源码" target="_blank">HTML5游戏源码</a></li>
+																																	</ul><!-- END .items -->
+									</div>
+                     </div>
+					</li>			
+				</ul>
+			</li>
+			<li class="themes">
+				<ul>
+					<li class="bold-item">
+                    						<a href="javascript:void(0);"><span class="hide">科蚁网HTML5学习交流</span><span class="sprite menu-icon"></span></a>
+						<div class="dropdown cols ext">
+									<div class="col col-1">
+										<h3 class="group-title">网页设计学习</h3>
+										<ul class="items megamenu-specific">
+										<li><a href="http://www.ke01.com/shejijiayouzhan/" title="设计加油站" target="_blank">设计加油站<span class="label update">热门</span></a></li>
+										</ul>
+                                        <h3 class="group-title">HTML5酷站欣赏</h3>
+										<ul class="items megamenu-specific">
+										<li><a href="http://www.ke01.com/HTML5kuzhan/guoneikuzhan/" title="国内HTML5酷站" target="_blank">国内HTML5酷站</a></li>
+										<li><a href="http://www.ke01.com/HTML5kuzhan/oumeikuzhan/" title="欧美HTML5酷站" target="_blank">欧美HTML5酷站</a></li>
+                                        <li><a href="http://www.ke01.com/HTML5kuzhan/rihankuzhan/" title="日韩HTML5酷站" target="_blank">日韩HTML5酷站</a></li>	
+										<li><a href="http://www.ke01.com/HTML5kuzhan/qitakuzhan/" title="其他酷站" target="_blank">其他酷站欣赏</a></li>
+										</ul>
+									</div>
+                                    
+									<div class="col col-2">
+										<h3 class="group-title">科蚁学院</h3>
+										<ul class="items slider">
+										<li><a href="http://www.ke01.com/College/shoujijianzhan/" title="手机建站教程" target="_blank">手机建站教程</a></li>
+                 <li><a href="http://www.ke01.com/College/HTML5CSS3/" title="HTML5+CSS3教程" target="_blank">HTML5+CSS3教程</a></li>
+                  <li><a href="http://www.ke01.com/College/jqueryMobile/" title="jquery Mobile教程" target="_blank">jquery Mobile教程</a></li>
+                   <li><a href="http://www.ke01.com/College/KEYICMS/" title="KEYICMS教程" target="_blank">KEYICMS教程</a></li>
+                    <li><a href="http://www.ke01.com/forum-49-1.html" title="HTML5原创" target="_blank">HTML5原创</a></li>
+                    <li><a href="http://www.ke01.com/forum-50-1.html" title="HTML5学习交流" target="_blank">HTML5学习交流</a></li> 
+																																	</ul><!-- END .items -->
+									</div>
+                                    
+									<div class="col col-3">
+                                        <h3 class="group-title">KEYICMS（手机建站系统）</h3>
+										<ul class="items megamenu-specific">
+										<li><a href="http://www.ke01.com/forum-60-1.html" title="KEYICMS程序发布" target="_blank">KEYICMS程序发布</a></li>
+										<li><a href="http://www.ke01.com/forum-62-1.html" title="KEYICMS安装使用" target="_blank">KEYICMS安装使用</a></li>
+                                        <li><a href="http://www.ke01.com/forum-61-1.html" title="KEYICMS模板插件" target="_blank">KEYICMS模板插件</a></li>	
+										<li><a href="http://www.ke01.com/forum-63-1.html" title="KEYICMS发展建议" target="_blank">KEYICMS发展建议</a></li>
+										</ul>
+                                        <h3 class="group-title">科蚁网商业资源</h3>
+										<ul class="items megamenu-specific">
+										<li><a href="http://www.ke01.com/forum-vip-1.html" title="VIP资源专区" target="_blank">VIP资源专区<span class="label update">VIP专享</span></a></li>
+										<li><a href="http://www.ke01.com/forum-55-1.html" title="商业模板发布" target="_blank">商业模板发布<span class="label update">付费购买</span></a></li>
+										</ul>
+                                        
+									</div>
+                                    </div>
+                    </li>
+                    </ul>
+                    </li>
+
+
+
+				<li class="resize animated fadeIn">
+					<ul>
+						<li><a href="#" class="sprite resize-icon desktop" title="PC端效果演示"></a></li>
+						<li><a href="#" class="sprite resize-icon ipad-portrait" title="平板竖向显示"></a></li>
+						<li><a href="#" class="sprite resize-icon ipad-landscape" title="平板横向显示"></a></li>
+						<li><a href="#" class="sprite resize-icon iphone" title="手机竖向显示"></a></li>
+						<li><a href="#" class="sprite resize-icon iphone-landscape" title="手机横向显示"></a></li>
+					</ul>
+				</li>
+
+				<li class="remove_frame">
+					<a class="index.html"></a>
+				</li>
+
+
+<!--					<li class="bold-item purchase">			
+						<a href="javascript :history.back(-1)" target="blank">	
+							返回原文
+							<span class="sprite cart-icon"></span>
+						</a>
+					</li>-->
+
+					<li class="bold-item reverse signup">
+						<a class="signup-link" href="http://www.ke01.com" title="HTML5建站资源交流分享社区" target="blank">科蚁网</a>
+					</li>
+
+				</ul>
+
+			</div>
+
+			<div id="iframe-wrap">
+				<div id="demo-loading" style="display: none">
+					<!--div class="loadding">Loading...</div-->
+					<div id="circularG">
+						<div id="circularG_1" class="circularG"></div>
+						<div id="circularG_2" class="circularG"></div>
+						<div id="circularG_3" class="circularG"></div>
+						<div id="circularG_4" class="circularG"></div>
+						<div id="circularG_5" class="circularG"></div>
+						<div id="circularG_6" class="circularG"></div>
+						<div id="circularG_7" class="circularG"></div>
+						<div id="circularG_8" class="circularG"></div>
+					</div>
+				</div>
+				<iframe id="iframe" frameborder="0" width="100%" src="index.html"></iframe>
+			</div>
+		</body>
+		</html>
