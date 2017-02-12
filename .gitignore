@@ -33,5 +33,3 @@ output.tar.gz
 /app/
 
 runtime/
-
-/archive/*
