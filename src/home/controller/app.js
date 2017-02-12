@@ -11,8 +11,11 @@ export default class extends Base {
     * indexAction() {
         let dir = 'file:///' + path.resolve('.') + '/archive';
         this.assign('baseDir', dir);
-        let proList = think.config('aipro');
-        this.assign('proList', proList);
+
+        let proConfList = {};
+        proConfList.pro = super.getAllProConfig();
+
+        this.assign('proList', proConfList);
         return this.display();
     }
 }

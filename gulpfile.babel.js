@@ -14,13 +14,20 @@ import concat from 'gulp-concat';
 import fs from 'fs';
 import path from 'path';
 import plumber from 'gulp-plumber';
+import chmod from 'gulp-chmod';
 import zip from 'gulp-zip';
 import gutil from 'gulp-util';
 import moment from 'moment';
+import color from 'colors-cli/safe';
+let cError = color.red.bold;
+let cWarn = color.yellow;
+let cNotice = color.blue;
+let cSuccess = color.green;
+let cInfo = color.cyan;
+let cTitle = color.magenta.bold;
 import browserS from 'browser-sync';
 let browserSync = browserS.create();
 import nodeUnique from 'node-unique-array';
-let proArr = new nodeUnique();
 
 /**
  * 以某元素为索引数组去重
@@ -57,46 +64,115 @@ Array.prototype.unique = function (key) {
 import packageConf from './package.json';
 import initList from './src/common/config/initpro';
 import appConfig from './src/common/config/config';
+// 配置信息常量
 const aiproConfPath = './src/common/config';
 const aiproConfPre = appConfig.pro_conf_pref; //aipro
-let proList = {};
-proList.pro = [];
-try {
-    // 装入初始化项目配置文件
-    proArr.add(initList.pro);
+const tmpAiproConfPath = './src/common/config/pro';
+// 定义项目相关路径常量
+const rootDir = './';
+const logicDir = 'src';
+const viewDir = 'view';
+const wwwDir = 'www';
+const archiveDir = 'archive';
+const initSrcDir = logicDir + '/init';
+const initViewDir = viewDir + '/init';
+const initWwwDir = wwwDir + '/static/init';
+const gulpAction = gutil.env._[0];
 
-    let aiProInfo = fs.statSync(aiproConfPath);
-    if (aiProInfo.isDirectory()) {
-        let tempFiles = fs.readdirSync(aiproConfPath);
-        tempFiles.forEach(function (fileName, k) {
-            // 判断是否为项目配置前缀
-            if (fileName.indexOf(aiproConfPre) == 0) {
-                let tmpPath = path.join(aiproConfPath, fileName);
-                if (fs.statSync(tmpPath).isFile()) {
+let proList = {};
+
+/**
+ * 获取所有项目配置信息
+ * @return {*}
+ */
+function getAllProConf() {
+    let proArr = new nodeUnique();
+    try {
+        // 装入初始化项目配置文件
+        proArr.add(initList.pro);
+
+        let aiProInfo = fs.statSync(aiproConfPath);
+        if (aiProInfo.isDirectory()) {
+            // 读取已归档项目的配置信息
+            // 这种情况放在最前面
+            let archiveDirs = fs.readdirSync(archiveDir);
+            archiveDirs.forEach(function (dirName, k) {
+                let tmpInfo = {};
+                let tmpInfoArr = dirName.split('-');
+                let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
+                let proName = tmpInfoArr[2];
+                let proTitle = tmpInfoArr[3];
+                for (let i = 4; i < tmpInfoArr.length; i++) {
+                    proTitle += '-' + tmpInfoArr[i];
+                }
+                tmpInfo.sn = proSn;
+                tmpInfo.name = proName;
+                tmpInfo.title = proTitle;
+                let tmpArchiveConfPath = path.join(archiveDir, dirName, aiproConfPre + '-' + proSn + '-' + proName + '-conf.json');
+                if (fs.existsSync(tmpArchiveConfPath)) {
                     // 使用 require 语法时，路径必须带 ./
-                    let aiList = require('./' + tmpPath).default;
-                    for (let pro of aiList.pro) {
-                        if (proArr.contains(pro)) {
-                            proArr.remove(pro);
-                        }
-                        proArr.add(pro);
+                    let tmpConf = require('./' + tmpArchiveConfPath);
+                    if (!proArr.contains(tmpConf)) {
+                        proArr.add(tmpConf);
+                    }
+                } else {
+                    if (!proArr.contains(tmpInfo)) {
+                        proArr.add(tmpInfo);
                     }
                 }
+            });
+
+            // 读取批量项目配置信息
+            let tempFiles = fs.readdirSync(aiproConfPath);
+            tempFiles.forEach(function (fileName, k) {
+                // 判断是否为项目配置前缀
+                if (fileName.indexOf(aiproConfPre) == 0) {
+                    let tmpPath = path.join(aiproConfPath, fileName);
+                    if (fs.statSync(tmpPath).isFile()) {
+                        // 使用 require 语法时，路径必须带 ./
+                        let aiList = require('./' + tmpPath).default;
+                        for (let pro of aiList.pro) {
+                            if (proArr.contains(pro)) {
+                                proArr.remove(pro);
+                            }
+                            proArr.add(pro);
+                        }
+                    }
+                }
+            });
+
+            // 读取单个项目配置文件 xxxx.json
+            let reloadProConfFiles = fs.readdirSync(tmpAiproConfPath);
+            reloadProConfFiles.forEach(function (fileName, k) {
+                if (fileName.indexOf(aiproConfPre) == 0) {
+                    let tmpPath = path.join(tmpAiproConfPath, fileName);
+                    if (fs.statSync(tmpPath).isFile()) {
+                        // 使用 require 语法时，路径必须带 ./
+                        let tmpConf = require('./' + tmpPath);
+                        // console.log(tmpConf);
+                        if (!proArr.contains(tmpConf)) {
+                            proArr.add(tmpConf);
+                        }
+                    }
+                }
+            });
+        } else if (aiProInfo.isFile()) {
+            let aiList = require(aiproConfPath).default;
+            for (let pro of aiList.pro) {
+                if (proArr.contains(pro)) {
+                    proArr.remove(pro);
+                }
+                proArr.add(pro);
             }
-        });
-    } else if (aiProInfo.isFile()) {
-        let aiList = require(aiproConfPath).default;
-        for (let pro of aiList.pro) {
-            if (proArr.contains(pro)) {
-                proArr.remove(pro);
-            }
-            proArr.add(pro);
         }
+    } catch (err) {
+        // console.log(err);
     }
-} catch (err) {
-    // console.log(err);
+    return proArr.get();
 }
-proList.pro = proArr.get();
+
+// 读取所有配置信息
+proList.pro = getAllProConf();
 
 // 对合并后的项目信息进行去重
 proList.pro = proList.pro.unique('sn');
@@ -120,15 +196,23 @@ import less from 'gulp-less';
 import sourcemaps from 'gulp-sourcemaps';
 
 // 接收任务参数
-// 项目序列号
-let proSn = gutil.env.sn ? gutil.env.sn : '';
 // 项目名称、标题、支持设备类型、CSS编译方式
-let proName, proTitle, deviceType, remUnit, compileCssType;
+let proSn = '',
+    proName = '',
+    proTitle = '',
+    deviceType = '',
+    remUnit = '',
+    compileCssType = '',
+    proConf = '';
+// 项目序列号
+proSn = gutil.env.sn ? gutil.env.sn : '';
+// 传入项目名称方式执行任务
+proName = gutil.env.pro ? gutil.env.pro : '';
+
 if (proSn === '') {
-    // 传入项目名称方式执行任务
-    proName = gutil.env.pro ? gutil.env.pro : '';
     for (let pro of proList.pro) {
         if (pro.name === proName) {
+            proConf = pro;
             proSn = pro.sn;
             proTitle = pro.title;
             deviceType = pro.dev;
@@ -141,6 +225,7 @@ if (proSn === '') {
     // 传入项目序列号方式执行任务
     for (let pro of proList.pro) {
         if (pro.sn === proSn) {
+            proConf = pro;
             proName = pro.name;
             proTitle = pro.title;
             deviceType = pro.dev;
@@ -151,22 +236,58 @@ if (proSn === '') {
     }
 }
 
-// 定义项目相关路径常量
-const rootDir = './';
-const logicDir = 'src';
-const viewDir = 'view';
-const wwwDir = 'www';
-const archiveDir = 'archive';
+// 当前
 const srcDir = wwwDir + '/static/' + proName + '/src';
 const distDir = wwwDir + '/static/' + proName + '/dist';
 const proSrcDir = logicDir + '/' + proName;
 const proViewDir = viewDir + '/' + proName;
 const proWwwDir = wwwDir + '/static/' + proName;
 const proArchiveDir = archiveDir + '/' + proSn + '-' + proName + '-' + proTitle;
-const initSrcDir = logicDir + '/init';
-const initViewDir = viewDir + '/init';
-const initWwwDir = wwwDir + '/static/init';
-const gulpAction = gutil.env._[0];
+const archiveConfFileName = aiproConfPre + '-' + proSn + '-' + proName + '-conf.json';
+
+/**
+ * 读取归档后的项目配置信息
+ * @return {Array}
+ */
+function getArchiveList() {
+    let archiveDirs = fs.readdirSync(archiveDir);
+    let archiveProArr = [];
+    archiveDirs.forEach(function (dirName, k) {
+        let tmpInfo = {};
+        let tmpInfoArr = dirName.split('-');
+        let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
+        let proName = tmpInfoArr[2];
+        let proTitle = tmpInfoArr[3];
+        for (let i = 4; i < tmpInfoArr.length; i++) {
+            proTitle += '-' + tmpInfoArr[i];
+        }
+        tmpInfo.sn = proSn;
+        tmpInfo.name = proName;
+        tmpInfo.title = proTitle;
+        let tmpArchiveConfPath = path.join(archiveDir, dirName, archiveConfFileName);
+        if (fs.existsSync(tmpArchiveConfPath)) {
+            // 使用 require 语法时，路径必须带 ./
+            let tmpConf = require('./' + tmpArchiveConfPath);
+            archiveProArr.push(tmpConf);
+        } else {
+            archiveProArr.push(tmpInfo);
+        }
+    });
+    return archiveProArr;
+}
+
+/**
+ * 错误处理
+ * @param err
+ */
+function errHandle(err) {
+    gutil.log(cError(err.message));
+    gutil.log(cError('Error detail::'));
+    console.log(err);
+    console.log('');
+    // 表示调用已结束，否则数据无法进入下一个 pipe操作
+    this.emit('end');
+}
 
 /**
  * 打印项目任务参数信息
@@ -176,10 +297,10 @@ function printProHead() {
     console.log('------------------------------------------------------------------');
     console.log('-- Gulp task params');
     console.log('------------------------------------------------------------------');
-    console.log('Project title:: ' + proTitle);
-    console.log('Project SN:: ' + proSn);
-    console.log('Project Name:: ' + proName);
-    console.log('Device Type:: ' + deviceType);
+    console.log('Project title:: ' + cInfo(proTitle));
+    console.log('Project SN:: ' + cInfo(proSn));
+    console.log('Project Name:: ' + cInfo(proName));
+    console.log('Device Type:: ' + cInfo(deviceType));
     console.log('------------------------------------------------------------------');
 }
 
@@ -189,12 +310,12 @@ function printProHead() {
  */
 function printProInfo(proInfo) {
     console.log('------------------------------------------------------------------');
-    console.log('-- ' + proInfo.title + ' 项目信息');
+    console.log('-- ' + cTitle(proInfo.title) + ' 项目信息');
     console.log('------------------------------------------------------------------');
-    console.log('Project title:: ' + proInfo.title);
-    console.log('Project SN:: ' + proInfo.sn);
-    console.log('Project Name:: ' + proInfo.name);
-    console.log('Surport Device Type:: ' + proInfo.dev);
+    console.log('Project title:: ' + cInfo(proInfo.title));
+    console.log('Project SN:: ' + cInfo(proInfo.sn));
+    console.log('Project Name:: ' + cInfo(proInfo.name));
+    console.log('Surport Device Type:: ' + cInfo(proInfo.dev));
     console.log('------------------------------------------------------------------');
 }
 
@@ -203,8 +324,27 @@ function printProInfo(proInfo) {
  */
 function checkProParam() {
     if (proName === '' || proSn === '') {
-        console.log('ERR:: The project param is error, or the project config is gone, please check!');
+        console.log('ERR:: ' + cError('The project param is error, or the project config is gone, please check!'));
         process.exit();
+    }
+}
+
+/**
+ * 检查 重加载任务 参数是否正确
+ */
+function checkReloadParam() {
+    if (proName === '' && proSn === '') {
+        console.log('ERR:: ' + cError('The project param is error, or the project config is gone, please check!'));
+        process.exit();
+    } else {
+        // 传入了 项目名称
+        if (proName != '' && proSn === '') {
+
+        }
+
+        // 传入了 项目编码
+        if (proName === '' && proSn != '') {
+        }
     }
 }
 
@@ -215,11 +355,11 @@ function checkProDir() {
     try {
         let srcDirStat = fs.statSync(srcDir);
         if (!srcDirStat.isDirectory()) {
-            console.log('ERR:: The project name is error, please check!');
+            console.log('ERR:: ' + cError('The project name is error, please check!'));
             process.exit();
         }
     } catch (err) {
-        console.log('ERR:: The project name is error, please check!');
+        console.log('ERR:: ' + cError('The project name is error, please check!'));
         process.exit();
     }
 }
@@ -228,43 +368,43 @@ function checkProDir() {
 switch (gulpAction) {
     case 'init':
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目初始化');
+        console.log('-- ' + cTitle(proName) + ' 项目初始化');
         checkProParam();
         printProHead();
         break;
     case 'archive':
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目归档');
+        console.log('-- ' + cTitle(proName) + ' 项目归档');
         checkProParam();
         printProHead();
         break;
     case 'delpro':
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目删除');
+        console.log('-- ' + cTitle(proName) + ' 项目删除');
         checkProParam();
         printProHead();
         break;
     case 'reload':
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目重加载');
+        console.log('-- ' + cTitle(proName) + ' 项目重加载');
         checkProParam();
         printProHead();
         break;
     case 'release':
         console.log('==================================================================');
-        console.log('-- ' + packageConf.name + ' 打包自动发布 v' + packageConf.version + ' 版');
+        console.log('-- ' + cTitle(packageConf.name + ' 打包自动发布 v' + packageConf.version + ' 版'));
         console.log('------------------------------------------------------------------');
         break;
     case 'make':
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目编译');
+        console.log('-- ' + cTitle(proName) + ' 项目编译');
         checkProParam();
         checkProDir();
         printProHead();
         break;
     case 'dist':
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目发布');
+        console.log('-- ' + cTitle(proName) + ' 项目发布');
         checkProParam();
         checkProDir();
         printProHead();
@@ -279,9 +419,9 @@ switch (gulpAction) {
         break;
     case 'listpages':
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目包含页面列表');
+        console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
         checkProParam();
-        checkProDir();
+        // checkProDir();
         printProHead();
         break;
     case 'search':
@@ -290,7 +430,7 @@ switch (gulpAction) {
         break;
     default :
         console.log('==================================================================');
-        console.log('-- ' + proName + ' 项目自动监控');
+        console.log('-- ' + cTitle(proName) + ' 项目自动监控');
         checkProParam();
         checkProDir();
         printProHead();
@@ -299,6 +439,7 @@ switch (gulpAction) {
 
 // 列出当前工程下所管理的所有项目信息
 gulp.task('list', function () {
+    console.log('-- ' + cTitle('项目总数:: ') + cSuccess(proList.pro.length));
     for (let pro of proList.pro) {
         printProInfo(pro);
         console.log(' ');
@@ -308,17 +449,21 @@ gulp.task('list', function () {
 // 列出以关键词搜索到的项目信息
 gulp.task('search', function () {
     let searchKey = gutil.env.key ? gutil.env.key : '';
-    console.log('-- 搜索关键词为:: ' + searchKey);
+    console.log('-- 搜索关键词为:: ' + cWarn(searchKey));
     console.log(' ');
     if (searchKey != '') {
         for (let pro of proList.pro) {
             if (pro.title.indexOf(searchKey) >= 0 || pro.sn.indexOf(searchKey) >= 0 || pro.name.indexOf(searchKey) >= 0) {
                 printProInfo(pro);
+                console.log('-- ' + cTitle('Project configuration detail::'));
+                console.log('------------------------------------------------------------------');
+                console.log(pro);
+                console.log('------------------------------------------------------------------');
                 console.log(' ');
             }
         }
     } else {
-        console.log('ERR:: The search keywords is empty, please check!');
+        console.log('ERR:: ' + cError('The search keywords is empty, please check!'));
         process.exit();
     }
 });
@@ -326,7 +471,7 @@ gulp.task('search', function () {
 // 列出项目所包含的页面信息
 gulp.task('listpages', function () {
     let confPath = './src/' + proName + '/config/data.js';
-    let archiveConfPath = '../archive/' + proSn + '-' + proName + '-' + proTitle + '/src/' + proName + 'config/data.js';
+    let archiveConfPath = './archive/' + proSn + '-' + proName + '-' + proTitle + '/src/' + proName + '/config/data.js';
     let confExist = fs.existsSync(confPath);
     let archiveConfExist = fs.existsSync(archiveConfPath);
     let realPath;
@@ -338,12 +483,13 @@ gulp.task('listpages', function () {
     let pagesData = require(realPath);
     console.log('------------------------------------------------------------------');
     console.log('-- ' + proTitle + ' 项目页面信息');
+    let pagesCount = Object.keys(pagesData.default.pages).length;
+    console.log('-- ' + cTitle('页面总数:: ') + cSuccess(pagesCount));
     for (let page in pagesData.default.pages) {
         let pageObj = pagesData.default.pages[page];
         console.log('------------------------------------------------------------------');
-        console.log('-- ');
-        console.log('-- Page title:: ' + pageObj.title);
-        console.log('-- Page file name:: ' + pageObj.action + '.html');
+        console.log('-- Page title:: ' + cInfo(pageObj.title));
+        console.log('-- Page file name:: ' + cInfo(pageObj.action + '.html'));
         console.log('-- ');
         console.log('------------------------------------------------------------------');
     }
@@ -377,7 +523,7 @@ gulp.task('copy', ['clean'], function () {
 // 项目归档，将已开发完成的项目归档到对应的文件夹中
 // task action:: archive
 let archiveFileArr = [proSrcDir + '/**/*', proViewDir + '/**/*', proWwwDir + '/**/*'];
-let archiveDirArr = [proSrcDir, proViewDir, proWwwDir];
+let archiveDirArr = [proSrcDir, proViewDir, proWwwDir, './src/common/config/pro/' + archiveConfFileName];
 gulp.task('archive:copy', function () {
     return gulp.src(
         archiveFileArr, {
@@ -386,14 +532,32 @@ gulp.task('archive:copy', function () {
     ).pipe(gulp.dest(proArchiveDir));
 });
 
-gulp.task('archive:del', ['archive:copy'], function () {
+// task action:: export configuration
+gulp.task('archive:conf', ['archive:copy'], function () {
+    fs.writeFileSync(proArchiveDir + '/' + archiveConfFileName, JSON.stringify(proConf));
+});
+
+// task action:: zip
+gulp.task('archive:zip', ['archive:conf'], function () {
+    let timeStr = moment().format('YYYYMMDDHHmmss');
+    gulp.src([proArchiveDir + '/**/*', '!' + proArchiveDir + '/*.zip'], {base: archiveDir})
+        .pipe(chmod(0o755, 0o40755))
+        .pipe(zip(proSn + '-' + proName + '-' + proTitle + '-' + timeStr + '.zip'))
+        .pipe(gulp.dest(proArchiveDir))
+        .on('end', function () {
+            process.exit();
+        });
+});
+
+// task action:: del
+gulp.task('archive:del', ['archive:zip'], function () {
     del(archiveDirArr);
 });
 
-gulp.task('archive', ['archive:del']);
+gulp.task('archive', ['archive:zip']);
 
 // 删除项目源码，请注意，本操作有风险，删除后无法找回
-let proDirArr = [proSrcDir, proViewDir, proWwwDir];
+let proDirArr = [proSrcDir, proViewDir, proWwwDir, './src/common/config/pro/' + archiveConfFileName];
 // task action:: delpro
 gulp.task('delpro', function () {
     del(proDirArr);
@@ -402,11 +566,16 @@ gulp.task('delpro', function () {
 // 项目重新加载，项目归档操作的反操作。将已归档的项目源码，重新加载到开发环境中，便于持续开发。
 // task action:: reload
 gulp.task('reload', function () {
-    return gulp.src(
-        [proArchiveDir + '/**/*'], {
+    gulp.src(
+        [proArchiveDir + '/**/*', '!' + proArchiveDir + '/*.zip', '!' + proArchiveDir + '/*.json'], {
             base: proArchiveDir
         }
     ).pipe(gulp.dest('./'));
+    gulp.src(
+        [proArchiveDir + '/*.json'], {
+            base: proArchiveDir
+        }
+    ).pipe(gulp.dest('./src/common/config/pro/'));
 });
 
 // CSS压缩处理配置
@@ -462,7 +631,11 @@ switch (deviceType) {
         break;
 }
 
-// 根据设备类型返回 grace 配置数组
+/**
+ * 根据设备类型返回 grace 配置数组
+ * @param devType
+ * @returns {*}
+ */
 function getDevProcessorsGraceConf(devType) {
     let confArr;
     switch (devType) {
@@ -485,11 +658,7 @@ function getDevProcessorsGraceConf(devType) {
 gulp.task('css', function () {
     return gulp.src(srcDir + '/css/*.css')
         .pipe(plumber({
-            errorHandler: function (err) {
-                gutil.log(err);
-                // 表示调用已结束，否则数据无法进入下一个 pipe操作
-                this.emit('end');
-            }
+            errorHandler: errHandle
         }))
         .pipe(postcss(distProcessors))
         .pipe(gulp.dest(distDir + '/css'));
@@ -533,11 +702,7 @@ gulp.task('concat', function () {
     console.log('------------------------------------------------------------------');
     return gulp.src(cssArr)
         .pipe(plumber({
-            errorHandler: function (err) {
-                gutil.log(err);
-                // 表示调用已结束，否则数据无法进入下一个 pipe操作
-                this.emit('end');
-            }
+            errorHandler: errHandle
         }))
         .pipe(postcss(devProcessors_concat))
         .pipe(concat('comm.css'))
@@ -548,11 +713,7 @@ gulp.task('concat', function () {
 gulp.task('less', function () {
     return gulp.src(lessArr)
         .pipe(plumber({
-            errorHandler: function (err) {
-                gutil.log(err);
-                // 表示调用已结束，否则数据无法进入下一个 pipe操作
-                this.emit('end');
-            }
+            errorHandler: errHandle
         }))
         .pipe(sourcemaps.init())
         .pipe(less())
@@ -567,11 +728,7 @@ gulp.task('less', function () {
 gulp.task('groupConcat', groupFiles(cssSrc, function (name, files) {
     return gulp.src(files)
         .pipe(plumber({
-            errorHandler: function (err) {
-                gutil.log(err);
-                // 表示调用已结束，否则数据无法进入下一个 pipe操作
-                this.emit('end');
-            }
+            errorHandler: errHandle
         }))
         .pipe(postcss(devProcessors_concat))
         .pipe(concat(name + '.css'))
@@ -579,26 +736,19 @@ gulp.task('groupConcat', groupFiles(cssSrc, function (name, files) {
 }));
 
 // group compile the less files
-gulp.task('groupLess',
-    groupFiles(lessSrc, function (name, files) {
-            return gulp.src(files)
-                .pipe(plumber({
-                    errorHandler: function (err) {
-                        gutil.log(err);
-                        // 表示调用已结束，否则数据无法进入下一个 pipe操作
-                        this.emit('end');
-                    }
-                }))
-                .pipe(sourcemaps.init())
-                .pipe(less())
-                .pipe(sourcemaps.write())
-                // concat
-                .pipe(postcss(devProcessors_concat))
-                .pipe(concat(name + '.css'))
-                .pipe(gulp.dest(srcDir + '/css'));
-        }
-    )
-);
+gulp.task('groupLess', groupFiles(lessSrc, function (name, files) {
+    return gulp.src(files)
+        .pipe(plumber({
+            errorHandler: errHandle
+        }))
+        .pipe(sourcemaps.init())
+        .pipe(less())
+        .pipe(sourcemaps.write())
+        // concat
+        .pipe(postcss(devProcessors_concat))
+        .pipe(concat(name + '.css'))
+        .pipe(gulp.dest(srcDir + '/css'));
+}));
 
 let cssConcatSrc = {
     'comm': [
@@ -616,11 +766,7 @@ let cssConcatSrc = {
 gulp.task('grace', ['concat'], function () {
     return gulp.src(srcDir + '/css/comm.css')
         .pipe(plumber({
-            errorHandler: function (err) {
-                gutil.log(err);
-                // 表示调用已结束，否则数据无法进入下一个 pipe操作
-                this.emit('end');
-            }
+            errorHandler: errHandle
         }))
         .pipe(postcss(devProcessors_grace))
         .pipe(gulp.dest(srcDir + '/css'));
@@ -639,14 +785,12 @@ switch (compileCssType) {
         beforeGraceWorks = ['groupConcat'];
         break;
 }
+
+// 成组 grace 任务
 gulp.task('groupGrace', beforeGraceWorks, groupFiles(cssConcatSrc, function (name, files) {
     return gulp.src(files)
         .pipe(plumber({
-            errorHandler: function (err) {
-                gutil.log(err);
-                // 表示调用已结束，否则数据无法进入下一个 pipe操作
-                this.emit('end');
-            }
+            errorHandler: errHandle
         }))
         .pipe(postcss(getDevProcessorsGraceConf(name)))
         .pipe(gulp.dest(srcDir + '/css'));
@@ -687,7 +831,7 @@ gulp.task('watch', ['make'], function () {
             srcDir + '/css/less/**/*.less'
         ],
         ['groupGrace']).on('change', function (event) {
-            console.log('-- File:: ' + event.path + ' was ' + event.type + ', running tasks...');
+            gutil.log(cNotice('File:: ') + cWarn(event.path) + ' was ' + cSuccess(event.type) + ', running tasks...');
         }
     );
 });
@@ -779,6 +923,7 @@ gulp.task('dist', ['copy', 'css'], function () {
         console.log('-- ' + data);
         // make zip file
         gulp.src(distDir + '/**/*.*')
+            .pipe(chmod(0o755, 0o40755))
             .pipe(zip(proSn + '.' + proTitle + '-' + timeStr + '.zip'))
             .pipe(gulp.dest(distDir))
             .on('end', function () {
@@ -807,16 +952,26 @@ gulp.task('release', function () {
         rootDir + '/archive',
         rootDir + '/releases',
 
+        logicDir + '/common/**',
         logicDir + '/common/**/*.*',
+        logicDir + '/home/**',
         logicDir + '/home/**/*.*',
+        logicDir + '/init/**',
         logicDir + '/init/**/*.*',
+        '!' + logicDir + '/common/config/pro/*.json',
+        '!' + logicDir + '/common/config/' + aiproConfPre + '*.js',
 
+        viewDir + '/common/**',
         viewDir + '/common/**/*.*',
+        viewDir + '/home/**',
         viewDir + '/home/**/*.*',
+        viewDir + '/init/**',
         viewDir + '/init/**/*.*',
 
         wwwDir + '/*.*',
+        wwwDir + '/commLib/**',
         wwwDir + '/commLib/**/*.*',
+        wwwDir + '/static/init/**',
         wwwDir + '/static/init/**/*.*',
     ];
 
@@ -835,7 +990,8 @@ gulp.task('release', function () {
     }).pipe(gulp.dest(releaseDir)).on('end', function () {
         // step 3
         // zip the releases
-        gulp.src([releaseDir + '/**/*.*', releaseDir + '/**/.*', releaseDir + '/.*'])
+        gulp.src([releaseDir + '/**', releaseDir + '/**/*.*', releaseDir + '/**/.*', releaseDir + '/.*'])
+            .pipe(chmod(0o755, 0o40755))
             .pipe(zip(releaseZipName))
             .pipe(gulp.dest(releaseRootDir))
             .on('end', function () {
