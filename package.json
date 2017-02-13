@@ -4,6 +4,10 @@
   "description": "asiainfo ui automation workflow",
   "version": "0.0.8",
   "release-date": "",
+  "author": {
+    "name": "lfire",
+    "email": "yunzhi.li.08@gmail.com"
+  },
   "scripts": {
     "start": "node www/development.js",
     "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/ --source-maps",
