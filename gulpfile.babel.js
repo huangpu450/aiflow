@@ -990,6 +990,14 @@ gulp.task('release', function () {
     ];
 
     // step 1
+    // update the release date of the software
+    gulp.src("./package.json")
+        .pipe(jseditor({
+            "release-date": timeStr
+        }))
+        .pipe(gulp.dest(rootDir));
+
+    // step 2
     // create file and directory
     if (!fs.existsSync(releaseDir)) {
         fs.mkdirSync(releaseDir, '0755');
@@ -997,7 +1005,7 @@ gulp.task('release', function () {
         del([releaseDir + '/*', releaseRootDir + '/' + releaseName + '*']);
     }
 
-    // step 2
+    // step 3
     // copy source files to the release directory
     gulp.src(releaseSource, {
         base: './'
@@ -1067,6 +1075,7 @@ gulp.task('update', function () {
             if (verInfo.length == 0) {
                 verInfo = tmpVerInfo;
             } else {
+                // 版本号如果相同，则比较发布日期的先后
                 if (verInfo[1] == tmpVerInfo[1]) {
                     isNeedUpdate = parseInt(tmpVerInfo[2]) > parseInt(verInfo[2]);
                 } else {
@@ -1083,7 +1092,7 @@ gulp.task('update', function () {
     // 最大版本与当前版本比较
     if (verInfo.length > 0) {
         if (curVer == verInfo[1]) {
-            isNeedUpdate = parseInt(verInfo[2]) > curReleaseDate;
+            isNeedUpdate = parseInt(verInfo[2]) > parseInt(curReleaseDate);
         } else {
             isNeedUpdate = compareVer(verInfo[1], curVer);
         }
@@ -1092,7 +1101,17 @@ gulp.task('update', function () {
             newVerPath = verInfo[3];
             gulp.src(newVerPath)
                 .pipe(decompress())
-                .pipe(gulp.dest(rootDir + 'tmp'));
+                .pipe(gulp.dest(rootDir))
+                .on('end', function () {
+                    // 执行 npm install
+                    let updateRs = exec('npm install');
+                    updateRs.stdout.on('data', function (data) {
+                        console.log('------------------------------------------------------------------');
+                        console.log('-- update result data');
+                        console.log('------------------------------------------------------------------');
+                        gutil.log(data);
+                    });
+                });
             console.log('-- ');
             console.log('-- ' + cSuccess('当前版本已更新完成！'));
             console.log('-- ');
@@ -1122,6 +1141,5 @@ gulp.task('test', function () {
     // console.log(t);
     // console.log(moment().format('YYYYMMDDHHmmss'))
     gutil.log('stuff happened', 'Really it did', gutil.colors.magenta('123'));
-    gutil.beep();
     console.log(gutil.env);
 });
