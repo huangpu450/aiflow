@@ -28,6 +28,9 @@ let cTitle = color.magenta.bold;
 import browserS from 'browser-sync';
 let browserSync = browserS.create();
 import nodeUnique from 'node-unique-array';
+import jsbeautify from 'js-beautify';
+let beautify = jsbeautify.js_beautify;
+import jseditor from 'gulp-json-editor';
 
 /**
  * 以某元素为索引数组去重
@@ -97,27 +100,30 @@ function getAllProConf() {
             // 这种情况放在最前面
             let archiveDirs = fs.readdirSync(archiveDir);
             archiveDirs.forEach(function (dirName, k) {
-                let tmpInfo = {};
-                let tmpInfoArr = dirName.split('-');
-                let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
-                let proName = tmpInfoArr[2];
-                let proTitle = tmpInfoArr[3];
-                for (let i = 4; i < tmpInfoArr.length; i++) {
-                    proTitle += '-' + tmpInfoArr[i];
-                }
-                tmpInfo.sn = proSn;
-                tmpInfo.name = proName;
-                tmpInfo.title = proTitle;
-                let tmpArchiveConfPath = path.join(archiveDir, dirName, aiproConfPre + '-' + proSn + '-' + proName + '-conf.json');
-                if (fs.existsSync(tmpArchiveConfPath)) {
-                    // 使用 require 语法时，路径必须带 ./
-                    let tmpConf = require('./' + tmpArchiveConfPath);
-                    if (!proArr.contains(tmpConf)) {
-                        proArr.add(tmpConf);
+                let tmpProArchivePath = path.join(archiveDir, dirName);
+                if (fs.statSync(tmpProArchivePath).isDirectory()) {
+                    let tmpInfo = {};
+                    let tmpInfoArr = dirName.split('-');
+                    let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
+                    let proName = tmpInfoArr[2];
+                    let proTitle = tmpInfoArr[3];
+                    for (let i = 4; i < tmpInfoArr.length; i++) {
+                        proTitle += '-' + tmpInfoArr[i];
                     }
-                } else {
-                    if (!proArr.contains(tmpInfo)) {
-                        proArr.add(tmpInfo);
+                    tmpInfo.sn = proSn;
+                    tmpInfo.name = proName;
+                    tmpInfo.title = proTitle;
+                    let tmpArchiveConfPath = path.join(archiveDir, dirName, aiproConfPre + '-' + proSn + '-' + proName + '-conf.json');
+                    if (fs.existsSync(tmpArchiveConfPath)) {
+                        // 使用 require 语法时，路径必须带 ./
+                        let tmpConf = require('./' + tmpArchiveConfPath);
+                        if (!proArr.contains(tmpConf)) {
+                            proArr.add(tmpConf);
+                        }
+                    } else {
+                        if (!proArr.contains(tmpInfo)) {
+                            proArr.add(tmpInfo);
+                        }
                     }
                 }
             });
@@ -534,6 +540,9 @@ gulp.task('archive:copy', function () {
 
 // task action:: export configuration
 gulp.task('archive:conf', ['archive:copy'], function () {
+    let confStr = JSON.stringify(proConf);
+    confStr = beautify(confStr, {indent_size: 2});
+    console.log(confStr);
     fs.writeFileSync(proArchiveDir + '/' + archiveConfFileName, JSON.stringify(proConf));
 });
 
@@ -998,6 +1007,11 @@ gulp.task('release', function () {
                 process.exit();
             });
     });
+});
+
+gulp.task('update', function () {
+    let timeStr = moment().format('YYYYMMDDHHmmss');
+
 });
 
 // the default task
