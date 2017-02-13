@@ -957,6 +957,7 @@ gulp.task('release', function () {
         rootDir + '/.*',
         '!' + rootDir + '/.svn',
         '!' + rootDir + '/.idea',
+        '!' + rootDir + '/.git',
         rootDir + '/archive',
         rootDir + '/releases',
 
