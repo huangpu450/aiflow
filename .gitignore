@@ -48,4 +48,4 @@ runtime/
 !/www/static/init
 
 # Ignore the zip file in archive dir
-/archive/**/*.zip
+# /archive/**/*.zip

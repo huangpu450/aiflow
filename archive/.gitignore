@@ -1,5 +1,2 @@
-# Ignore everything in this directory
+# Ignore rules in this directory
 */*.zip
-# Except these file 
-!.gitignore
-!*.zip
