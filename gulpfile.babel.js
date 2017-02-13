@@ -16,7 +16,7 @@ import path from 'path';
 import plumber from 'gulp-plumber';
 import chmod from 'gulp-chmod';
 import zip from 'gulp-zip';
-import unzip from 'gulp-unzip';
+import decompress from 'gulp-decompress';
 import gutil from 'gulp-util';
 import moment from 'moment';
 import color from 'colors-cli/safe';
@@ -1046,7 +1046,6 @@ function compareVer(curV, reqV) {
 }
 
 gulp.task('update', function () {
-    let timeStr = moment().format('YYYYMMDDHHmmss');
     let releaseZips = fs.readdirSync(releaseRootDir);
     let curVer = packageConf.version;
     console.log('-- 当前版本号:: ' + cInfo(curVer));
@@ -1091,16 +1090,23 @@ gulp.task('update', function () {
 
         if (isNeedUpdate) {
             newVerPath = verInfo[3];
-            console.log(newVerPath);
             gulp.src(newVerPath)
-                .pipe(unzip())
+                .pipe(decompress())
                 .pipe(gulp.dest(rootDir + 'tmp'));
+            console.log('-- ');
+            console.log('-- ' + cSuccess('当前版本已更新完成！'));
+            console.log('-- ');
+            console.log('-- 版本号:: ' + cInfo(verInfo[1]));
+            console.log('-- 版本发布日期:: ' + cInfo(verInfo[2]));
         } else {
+            console.log('-- ');
             console.log('-- ' + cWarn('当前版本已是最新，无需升级！'));
         }
     } else {
+        console.log('-- ');
         console.log('-- ' + cWarn('当前版本已是最新，无需升级！'));
     }
+    console.log('------------------------------------------------------------------');
 });
 
 // the default task
