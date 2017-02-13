@@ -1,0 +1,97 @@
+@import "pro-lib-var.css";
+
+:root {
+    --menu-height: 20px;
+    --menu-normal-color: var(--font-normal-color);
+    --menu-active-color: #fff;
+    --menu-bg-color: #fff;
+    --menu-bg-active-color: var(--main-color-red);
+}
+
+.aiui-menu {
+    width: auto;
+    height: auto;
+    float: right;
+    position: relative;
+    font-size: 20px;
+    clear: fix;
+    margin-top: 25px;
+}
+
+.aiui-menu a, .aiui-menu a:visited, .aiui-menu a:hover, .aiui-menu a:focus {
+    text-decoration: none;
+}
+
+.aiui-menu .icon-down {
+    font-size: 12px;
+    padding-left: 5px;
+}
+
+.aiui-menu li {
+    display: block;
+    float: left;
+}
+
+.aiui-menu > li {
+    float: left;
+    line-height: var(--menu-height);
+    clear: fix;
+    background-color: var(--menu-bg-color);
+    border-radius: 6px;
+    margin: 0 10px;
+    border: 1px solid #fff;
+    width: 130px;
+}
+
+.aiui-menu > li.active,
+.aiui-menu > li.curr {
+    border-color: var(--main-color-red);
+    position: relative;
+}
+
+.aiui-menu > li.active.dropdown {
+    border-radius: 6px 6px 0 0;
+}
+
+.aiui-menu > li > a {
+    display: block;
+    padding: 10px;
+    line-height: var(--menu-height);
+    clear: fix;
+    font-size: 20px;
+}
+
+.aiui-menu > li > a:hover,
+.aiui-menu > li.active > a,
+.aiui-menu > li.curr > a {
+    display: block;
+    background-color: var(--menu-bg-active-color);
+    color: var(--menu-active-color);
+}
+
+.aiui-menu .aiui-dropdown-menu {
+    display: none;
+    clear: fix;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 9;
+    background-color: #fff;
+    margin: auto -1px;
+    border: 1px solid var(--main-color-red);
+    border-radius: 0 0 6px 6px;
+}
+
+.aiui-menu .active .aiui-dropdown-menu {
+    display: block;
+}
+
+.aiui-menu .aiui-dropdown-menu li {
+    line-height: 36px;
+    clear: fix;
+    width: 100%;
+}
+
+.aiui-menu .aiui-dropdown-menu li a:hover {
+    color: var(--main-color-red);
+}
