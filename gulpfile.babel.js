@@ -542,8 +542,7 @@ gulp.task('archive:copy', function () {
 gulp.task('archive:conf', ['archive:copy'], function () {
     let confStr = JSON.stringify(proConf);
     confStr = beautify(confStr, {indent_size: 2});
-    console.log(confStr);
-    fs.writeFileSync(proArchiveDir + '/' + archiveConfFileName, JSON.stringify(proConf));
+    fs.writeFileSync(proArchiveDir + '/' + archiveConfFileName, confStr);
 });
 
 // task action:: zip
