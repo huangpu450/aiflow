@@ -3,6 +3,7 @@
   "subname": "aiflow",
   "description": "asiainfo ui automation workflow",
   "version": "0.0.8",
+  "release-date": "",
   "scripts": {
     "start": "node www/development.js",
     "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/ --source-maps",
