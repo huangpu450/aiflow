@@ -61,28 +61,31 @@ export default class extends think.controller.base {
         let archiveDir = './archive';
         let archiveDirs = fs.readdirSync(archiveDir);
         archiveDirs.forEach(function (dirName, k) {
-            let tmpInfo = {};
-            let tmpInfoArr = dirName.split('-');
-            let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
-            let proName = tmpInfoArr[2];
-            let proTitle = tmpInfoArr[3];
-            for (let i = 4; i < tmpInfoArr.length; i++) {
-                proTitle += '-' + tmpInfoArr[i];
-            }
-            tmpInfo.sn = proSn;
-            tmpInfo.name = proName;
-            tmpInfo.title = proTitle;
-            let tmpArchiveConfPath = path.join(archiveDir, dirName, confPref + '-' + proSn + '-' + proName + '-conf.json');
-            if (fs.existsSync(tmpArchiveConfPath)) {
-                // 使用 require 语法时，路径必须带 ./
-                // let tmpConf = require('./' + tmpArchiveConfPath);
-                let tmpConf = JSON.parse(fs.readFileSync(tmpArchiveConfPath));
-                if (!proArr.contains(tmpConf)) {
-                    proArr.add(tmpConf);
+            let tmpProArchivePath = path.join(archiveDir, dirName);
+            if (fs.statSync(tmpProArchivePath).isDirectory()) {
+                let tmpInfo = {};
+                let tmpInfoArr = dirName.split('-');
+                let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
+                let proName = tmpInfoArr[2];
+                let proTitle = tmpInfoArr[3];
+                for (let i = 4; i < tmpInfoArr.length; i++) {
+                    proTitle += '-' + tmpInfoArr[i];
                 }
-            } else {
-                if (!proArr.contains(tmpInfo)) {
-                    proArr.add(tmpInfo);
+                tmpInfo.sn = proSn;
+                tmpInfo.name = proName;
+                tmpInfo.title = proTitle;
+                let tmpArchiveConfPath = path.join(archiveDir, dirName, confPref + '-' + proSn + '-' + proName + '-conf.json');
+                if (fs.existsSync(tmpArchiveConfPath)) {
+                    // 使用 require 语法时，路径必须带 ./
+                    // let tmpConf = require('./' + tmpArchiveConfPath);
+                    let tmpConf = JSON.parse(fs.readFileSync(tmpArchiveConfPath));
+                    if (!proArr.contains(tmpConf)) {
+                        proArr.add(tmpConf);
+                    }
+                } else {
+                    if (!proArr.contains(tmpInfo)) {
+                        proArr.add(tmpInfo);
+                    }
                 }
             }
         });
