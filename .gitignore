@@ -33,3 +33,16 @@ output.tar.gz
 /app/
 
 runtime/
+
+# Ignore other project config
+src/
+view/
+www/static/
+# Except these dir
+!src/common
+!src/home
+!src/init
+!view/common
+!view/home
+!view/init
+!www/static/init
