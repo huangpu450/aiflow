@@ -16,6 +16,7 @@ import path from 'path';
 import plumber from 'gulp-plumber';
 import chmod from 'gulp-chmod';
 import zip from 'gulp-zip';
+import unzip from 'gulp-unzip';
 import gutil from 'gulp-util';
 import moment from 'moment';
 import color from 'colors-cli/safe';
@@ -77,6 +78,7 @@ const logicDir = 'src';
 const viewDir = 'view';
 const wwwDir = 'www';
 const archiveDir = 'archive';
+const releaseRootDir = rootDir + 'releases';
 const initSrcDir = logicDir + '/init';
 const initViewDir = viewDir + '/init';
 const initWwwDir = wwwDir + '/static/init';
@@ -433,6 +435,10 @@ switch (gulpAction) {
     case 'search':
         console.log('==================================================================');
         console.log('-- 搜索项目');
+        break;
+    case 'update':
+        console.log('==================================================================');
+        console.log('-- 软件升级');
         break;
     default :
         console.log('==================================================================');
@@ -947,7 +953,6 @@ gulp.task('release', function () {
     let timeStr = moment().format('YYYYMMDDHHmmss');
     let ver = packageConf.version;
     let subName = packageConf.subname;
-    let releaseRootDir = rootDir + 'releases';
     let releaseDir = rootDir + 'releases/' + ver;
     let releaseName = subName + '-' + ver + '-';
     let releaseZipName = releaseName + timeStr + '.zip';
@@ -1009,9 +1014,93 @@ gulp.task('release', function () {
     });
 });
 
+/**
+ * 版本号比较方法
+ * 传入两个字符串，当前版本号：curV；比较版本号：reqV
+ * 调用方法举例：compareVer("1.1","1.2")，将返回false
+ *
+ * @param curV
+ * @param reqV
+ * @return {boolean}
+ */
+function compareVer(curV, reqV) {
+    if (curV && reqV) {
+        //将两个版本号拆成数字
+        let arr1 = curV.split('.'),
+            arr2 = reqV.split('.');
+        let minLength = Math.min(arr1.length, arr2.length),
+            position = 0,
+            diff = 0;
+        //依次比较版本号每一位大小，当对比得出结果后跳出循环（后文有简单介绍）
+        while (position < minLength && ((diff = parseInt(arr1[position]) - parseInt(arr2[position])) == 0)) {
+            position++;
+        }
+        diff = (diff != 0) ? diff : (arr1.length - arr2.length);
+        //若curV大于reqV，则返回true
+        return diff > 0;
+    } else {
+        //输入为空
+        console.log('-- ' + cError("版本号不能为空"));
+        return false;
+    }
+}
+
 gulp.task('update', function () {
     let timeStr = moment().format('YYYYMMDDHHmmss');
+    let releaseZips = fs.readdirSync(releaseRootDir);
+    let curVer = packageConf.version;
+    console.log('-- 当前版本号:: ' + cInfo(curVer));
+    let curReleaseDate = packageConf['release-date'];
+    console.log('-- 当前版本发布日期:: ' + cInfo(curReleaseDate));
+    let verInfo = [];
+    let isNeedUpdate = false;
+    let newVerPath = '';
 
+    // 选出压缩包中的最大版本
+    releaseZips.forEach(function (fileName, k) {
+        let tmpReleaseFile = path.join(releaseRootDir, fileName);
+        let tmpPathObj = path.parse(tmpReleaseFile);
+        if (fs.statSync(tmpReleaseFile).isFile() &&
+            fileName.indexOf(packageConf.subname) == 0
+            && tmpPathObj.ext == '.zip') {
+            let tmpVerInfo = tmpPathObj.name.split('-');
+            tmpVerInfo.push(tmpReleaseFile);
+            if (verInfo.length == 0) {
+                verInfo = tmpVerInfo;
+            } else {
+                if (verInfo[1] == tmpVerInfo[1]) {
+                    isNeedUpdate = parseInt(tmpVerInfo[2]) > parseInt(verInfo[2]);
+                } else {
+                    isNeedUpdate = compareVer(tmpVerInfo[1], verInfo[1]);
+                }
+
+                if (isNeedUpdate) {
+                    verInfo = tmpVerInfo;
+                }
+            }
+        }
+    });
+
+    // 最大版本与当前版本比较
+    if (verInfo.length > 0) {
+        if (curVer == verInfo[1]) {
+            isNeedUpdate = parseInt(verInfo[2]) > curReleaseDate;
+        } else {
+            isNeedUpdate = compareVer(verInfo[1], curVer);
+        }
+
+        if (isNeedUpdate) {
+            newVerPath = verInfo[3];
+            console.log(newVerPath);
+            gulp.src(newVerPath)
+                .pipe(unzip())
+                .pipe(gulp.dest(rootDir + 'tmp'));
+        } else {
+            console.log('-- ' + cWarn('当前版本已是最新，无需升级！'));
+        }
+    } else {
+        console.log('-- ' + cWarn('当前版本已是最新，无需升级！'));
+    }
 });
 
 // the default task
