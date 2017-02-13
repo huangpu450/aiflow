@@ -34,15 +34,18 @@ output.tar.gz
 
 runtime/
 
-# Ignore other project config
-src/
-view/
-www/static/
+# Ignore other project files
+/src/
+/view/
+/www/static/
 # Except these dir
-!src/common
-!src/home
-!src/init
-!view/common
-!view/home
-!view/init
-!www/static/init
+!/src/common
+!/src/home
+!/src/init
+!/view/common
+!/view/home
+!/view/init
+!/www/static/init
+
+# Ignore the zip file in archive dir
+/archive/**/*.zip
