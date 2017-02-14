@@ -509,16 +509,9 @@ gulp.task('listpages', function () {
 
 // 清除原有目录
 gulp.task('clean', function () {
-    let lib = gulp.src(distDir + '/lib/*')
-        .pipe(gulp.dest(distDir + '/lib'))
+    return gulp.src(distDir + '/*')
+        .pipe(gulp.dest(distDir))
         .pipe(vinyPaths(del));
-    let img = gulp.src(distDir + '/images/*')
-        .pipe(gulp.dest(distDir + '/images/'))
-        .pipe(vinyPaths(del));
-    let zipFile = gulp.src(distDir + '/*.zip')
-        .pipe(gulp.dest(distDir + '/'))
-        .pipe(vinyPaths(del));
-    return merge(lib, img, zipFile);
 });
 
 // 发布到新的目录
