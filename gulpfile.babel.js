@@ -32,6 +32,7 @@ import nodeUnique from 'node-unique-array';
 import jsbeautify from 'js-beautify';
 let beautify = jsbeautify.js_beautify;
 import jseditor from 'gulp-json-editor';
+import imagemin from 'gulp-imagemin';
 
 /**
  * 以某元素为索引数组去重
@@ -519,6 +520,7 @@ gulp.task('copy', ['clean'], function () {
     let lib = gulp.src(srcDir + '/lib/**')
         .pipe(gulp.dest(distDir + '/lib/'))
     let img = gulp.src(srcDir + '/images/**')
+        .pipe(imagemin())
         .pipe(gulp.dest(distDir + '/images/'))
     let js = gulp.src(srcDir + '/js/**')
         .pipe(gulp.dest(distDir + '/js/'))
