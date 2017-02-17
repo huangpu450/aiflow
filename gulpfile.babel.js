@@ -664,7 +664,7 @@ function getDevProcessorsGraceConf(devType) {
 }
 
 // CSS编译任务
-gulp.task('css', function () {
+gulp.task('css', ['clean'], function () {
     return gulp.src(srcDir + '/css/*.css')
         .pipe(plumber({
             errorHandler: errHandle
