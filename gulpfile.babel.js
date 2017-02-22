@@ -643,6 +643,29 @@ switch (deviceType) {
 }
 
 /**
+ * 根据设备类型返回 concat 配置数组
+ * @param devType
+ * @return {*}
+ */
+function getDevProcessorConcatConf(devType) {
+    let confArr;
+    switch (devType) {
+        // 针对PC端设备的任务配置
+        case 'web':
+            confArr = devProcessors_concat_pc;
+            break;
+        // 针对移动端设备的任务配置
+        case 'wap':
+            confArr = devProcessors_concat_phone;
+            break;
+        default:
+            confArr = devProcessors_concat;
+    }
+
+    return confArr;
+}
+
+/**
  * 根据设备类型返回 grace 配置数组
  * @param devType
  * @returns {*}
@@ -677,34 +700,38 @@ gulp.task('css', ['clean'], function () {
 
 // 配置需要打包合并的CSS源文件路径
 let cssArr = [
-    srcDir + '/css/src/main.css',
+    srcDir + '/css/src/main*.css',
+    srcDir + '/css/src/comm*.css',
 ];
 
 let lessArr = [
-    srcDir + '/css/less/main.less',
+    srcDir + '/css/less/main*.less',
+    srcDir + '/css/less/comm*.less',
 ];
 
 let cssSrc = {
     'comm': [
-        srcDir + '/css/src/main.css'
+        srcDir + '/css/src/main*.css',
+        srcDir + '/css/src/comm*.css'
     ],
     'web': [
-        srcDir + '/css/src/web.css'
+        srcDir + '/css/src/web*.css'
     ],
     'wap': [
-        srcDir + '/css/src/wap.css'
+        srcDir + '/css/src/wap*.css'
     ]
 };
 
 let lessSrc = {
     'comm': [
-        srcDir + '/css/less/main.less'
+        srcDir + '/css/less/main*.less',
+        srcDir + '/css/less/comm*.less'
     ],
     'web': [
-        srcDir + '/css/less/web.less'
+        srcDir + '/css/less/web*.less'
     ],
     'wap': [
-        srcDir + '/css/less/wap.less'
+        srcDir + '/css/less/wap*.less'
     ]
 };
 
@@ -741,7 +768,8 @@ gulp.task('groupConcat', groupFiles(cssSrc, function (name, files) {
         .pipe(plumber({
             errorHandler: errHandle
         }))
-        .pipe(postcss(devProcessors_concat))
+        // .pipe(postcss(devProcessors_concat))
+        .pipe(postcss(getDevProcessorConcatConf(name)))
         .pipe(concat(name + '.css'))
         .pipe(gulp.dest(srcDir + '/css'));
 }));
@@ -756,7 +784,8 @@ gulp.task('groupLess', groupFiles(lessSrc, function (name, files) {
         .pipe(less())
         .pipe(sourcemaps.write())
         // concat
-        .pipe(postcss(devProcessors_concat))
+        // .pipe(postcss(devProcessors_concat))
+        .pipe(postcss(getDevProcessorConcatConf(name)))
         .pipe(concat(name + '.css'))
         .pipe(gulp.dest(srcDir + '/css'));
 }));
