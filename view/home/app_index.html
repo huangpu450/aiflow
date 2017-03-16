@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <!--
  * the asiainfo UED project list index
- * 
+ *
  * @author: yunzhi li
  * @version: 2016/10/8 15:26
  *           Id
@@ -10,12 +10,42 @@
 <head>
     <meta charset="UTF-8">
     <title>asiainfo UED project index</title>
+    <link rel="stylesheet" type="text/css"
+          href="/static/home/src/lib/Semantic-UI-2.2.9/dist/semantic.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="/static/home/src/lib/DataTables-1.10.13/dataTables.semanticui.min.css"/>
+
+    <script type="text/javascript" src="/static/home/src/lib/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="/static/home/src/lib/DataTables-1.10.13/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/static/home/src/lib/DataTables-1.10.13/dataTables.semanticui.min.js"></script>
+    <script type="text/javascript" src="/static/home/src/lib/Semantic-UI-2.2.9/dist/semantic.min.js"></script>
     <style type="text/css">
         body, body a {
             text-align: center;
             margin: 0 auto;
             font: 14px/1.5 "\5FAE\8F6F\96C5\9ED1", "\5B8B\4F53", Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        a {
             color: orange;
+        }
+
+        .proList {
+            padding: 10px 30px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .proNum, .proType, .proDate, .proDist {
+            width: 100px;
+        }
+
+        .proName {
+            width: 200px;
+        }
+
+        .proList .proType, .proList .proDate, .proList .proDist {
+            text-align: center;
         }
 
         .title {
@@ -24,79 +54,46 @@
             background-color: #007aff;
             text-align: left;
         }
-
-        ul, li {
-            list-style: none;
-        }
-
-        .proList {
-            padding: 10px 30px 60px;
-            text-align: left;
-        }
-
-        .proList a, .proList li {
-            line-height: 30px;
-            text-align: left;
-        }
-
-        .proList li {
-            clear: both;
-        }
-
-        .proList .proSn {
-            float: left;
-            width: 120px;
-        }
-
-        .proList .proLink {
-            float: left;
-            width: 300px;
-        }
-
-        .proList .proType, .proList .proDate {
-            float: left;
-            width: 90px;
-        }
-
-        .proList .proDist {
-            float: left;
-            width: 80px;
-        }
-
-        .proList .proArch {
-            float: left;
-            width: 400px;
-        }
-
-        .proList .proA {
-            float: left;
-            width: 100px;
-        }
     </style>
+    <script type="text/javascript">
+        $(function () {
+            $('.proListTable').DataTable();
+        });
+    </script>
 </head>
 <body>
 <div class="title">
     <h1>亚信CMC UED项目前端输出列表</h1>
 </div>
-<ul class="proList">
-    <li style="font-weight: bold;">
-        <span class="proSn">项目编号</span>
-        <span class="proLink">项目名称</span>
-        <span class="proType">项目类型</span>
-        <span class="proDate">立项日期</span>
-        <span class="proDist">项目发布</span>
-        <span class="proArch">项目归档</span>
-    </li>
-    {% for pro in proList.pro %}
-    <li>
-        <span class="proSn">{{pro.sn | upper}}</span>
-        <a class="proLink" href="/{{pro.name}}" target="_blank">{{ pro.title }}</a>
-        <span class="proType">{{pro.type}}</span>
-        <span class="proDate">{{pro.date}}</span>
-        <a class="proDist" href="/static/{{pro.name}}/dist/index.html" target="_blank">查看发布</a>
-        <span class="proArch">{{baseDir}}/{{pro.sn}}-{{pro.name}}-{{pro.title}}/www/static/{{pro.name}}/dist/index.html</span>
-    </li>
-    {% endfor %}
-</ul>
+
+<div class="proList">
+    <table class="proListTable ui celled table">
+        <thead>
+        <tr>
+            <th class="proNum">项目编号</th>
+            <th class="proName">项目名称</th>
+            <th class="proType">项目类型</th>
+            <th class="proDate">立项日期</th>
+            <th class="proDist">项目发布</th>
+            <th class="proArchive">项目归档</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for pro in proList.pro %}
+        <tr>
+            <td class="proNum">{{pro.sn | upper}}</td>
+            <td class="proName"><a href="/{{pro.name}}" target="_blank">{{ pro.title }}</a></td>
+            <td class="proType">{{pro.type}}</td>
+            <td class="proDate">{{pro.date}}</td>
+            <td class="proDist"><a href="/static/{{pro.name}}/dist/index.html" target="_blank">查看发布</a></td>
+            <td class="proArchive">
+                {{baseDir}}/{{pro.sn}}-{{pro.name}}-{{pro.title}}/www/static/{{pro.name}}/dist/index.html
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 </body>
 </html>
