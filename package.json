@@ -35,6 +35,7 @@
     "cssnano": "^3.7.5",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
+    "gulp-cache": "^0.4.6",
     "gulp-chmod": "^2.0.0",
     "gulp-concat": "^2.6.0",
     "gulp-decompress": "^2.0.1",

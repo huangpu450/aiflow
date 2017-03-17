@@ -24,28 +24,29 @@ coverage/
 node_modules/
 
 # IDE config
-/.idea
+.idea
 
 # output
 output/
 output.tar.gz
 
-/app/
+app/
 
 runtime/
 
 # Ignore other project files
-/src/
-/view/
-/www/static/
+src/
+view/
+www/static/
 # Except these dir
-!/src/common
-!/src/home
-!/src/init
-!/view/common
-!/view/home
-!/view/init
-!/www/static/init
+!src/common
+!src/home
+!src/init
+!view/common
+!view/home
+!view/init
+!www/static/init
+!www/static/home
 
 # Ignore the zip file in archive dir
-# /archive/**/*.zip
+# archive/**/*.zip

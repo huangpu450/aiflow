@@ -519,7 +519,7 @@ gulp.task('clean', function () {
 gulp.task('copy', ['clean'], function () {
     let lib = gulp.src(srcDir + '/lib/**')
         .pipe(gulp.dest(distDir + '/lib/'))
-    let img = gulp.src(srcDir + '/images/**')
+    let img = gulp.src(srcDir + '/images/*.{png,jpg,jpeg,gif,ico}')
         .pipe(imagemin())
         .pipe(gulp.dest(distDir + '/images/'))
     let js = gulp.src(srcDir + '/js/**')
