@@ -49,4 +49,4 @@ www/static/*
 !www/static/home
 
 # Ignore the zip file in archive dir
-# archive/**/*.zip
+archive/**/*.zip
