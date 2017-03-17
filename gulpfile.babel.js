@@ -20,6 +20,7 @@ import decompress from 'gulp-decompress';
 import gutil from 'gulp-util';
 import moment from 'moment';
 import color from 'colors-cli/safe';
+// display message in different color
 let cError = color.red.bold;
 let cWarn = color.yellow;
 let cNotice = color.blue;
@@ -56,88 +57,88 @@ const initViewDir = viewDir + '/init';
 const initWwwDir = wwwDir + '/static/init';
 const gulpAction = gutil.env._[0];
 
+// 所有项目信息存储对象
 let proList = {};
 
 // 项目配置信息模板
-let confInfoArr = [{
-    "key": "sn",
-    "desc": "项目编号，由英文、数字、-、_组合而成，必须唯一。",
-    "eg": "2016-HN001",
-    "must": true,
-    "default": ''
-}, {
-    "key": "name",
-    "desc": "项目编码，由英文、数字、下划线组成的字符串，不区分大小写，必须唯一",
-    "eg": "guodanian",
-    "must": true,
-    "default": ''
-}, {
-    "key": "title",
-    "desc": "项目标题",
-    "eg": "湖南移动-过大年聚合页",
-    "must": true,
-    "default": ''
-}, {
-    "key": "title",
-    "desc": "项目标题",
-    "eg": "湖南移动-过大年聚合页",
-    "must": true,
-    "default": ''
-}, {
-    "key": "author",
-    "desc": "项目作者，及相关的开发人员",
-    "eg": "张三，李四",
-    "must": false,
-    "default": ''
-}, {
-    "key": "type",
-    "desc": "项目类型，指定项目属于哪种类型：WEB、WAP",
-    "eg": "PC",
-    "must": false,
-    "default": ''
-}, {
-    "key": "dev",
-    "desc": "项目展示的平台类型，PC、PHONE、ALL",
-    "eg": "PHONE",
-    "must": false,
-    "default": ''
-}, {
-    "key": "date",
-    "desc": "项目创建日期",
-    "eg": "2016-12-10",
-    "must": false,
-    "default": ''
-}, {
-    "key": "remUnit",
-    "desc": "REM单位换算单元值，即设计稿的宽度除以10。如设计稿宽750，则值为75。",
-    "eg": "75",
-    "must": false,
-    "default": ''
-}, {
-    "key": "compileCss",
-    "desc": "CSS编译方式，指定CSS是以某种方式开发的，可选值：less, css，推荐less方式开发。",
-    "eg": "less",
-    "must": false,
-    "default": 'css'
-}, {
-    "key": "minImg",
-    "desc": "是否启用图片压缩，配置值：true（开启）， false（关闭）",
-    "eg": "false",
-    "must": false,
-    "default": false
-}, {
-    "key": "minLevel",
-    "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。智能判断可压缩的空间，存在最大只能压缩到一定程序，参数值增加不会产生效果。",
-    "eg": "3",
-    "must": false,
-    "default": 3
-}, {
-    "key": "svn",
-    "desc": "项目SVN地址",
-    "eg": "http://10.13.4.242:9999/svn/ui/hn/2017",
-    "must": false,
-    "default": ''
-}];
+let confInfoArr = [
+    // 必选参数
+    {
+        "key": "sn",
+        "desc": "项目编号，由英文、数字、-、_组合而成，必须唯一。",
+        "eg": "2016-HN001",
+        "must": true,
+        "default": ''
+    }, {
+        "key": "name",
+        "desc": "项目编码，由英文、数字、下划线组成的字符串，不区分大小写，必须唯一",
+        "eg": "guodanian",
+        "must": true,
+        "default": ''
+    }, {
+        "key": "title",
+        "desc": "项目标题",
+        "eg": "湖南移动-过大年聚合页",
+        "must": true,
+        "default": ''
+    }, {
+        "key": "dev",
+        "desc": "项目展示的平台类型，可用于决定CSS的编译方式，可选值:: pc/phone",
+        "eg": "phone",
+        "must": true,
+        "default": 'pc'
+    },
+    // 可选配置
+    {
+        "key": "author",
+        "desc": "项目作者，及相关的开发人员",
+        "eg": "张三，李四",
+        "must": false,
+        "default": ''
+    }, {
+        "key": "type",
+        "desc": "项目类型，指定项目属于哪种类型，会在哪种场景下展示，可选值:: web/wap/all",
+        "eg": "web",
+        "must": false,
+        "default": ''
+    }, {
+        "key": "date",
+        "desc": "项目创建日期",
+        "eg": "2016-12-10",
+        "must": false,
+        "default": ''
+    }, {
+        "key": "remUnit",
+        "desc": "REM单位换算单元值，即设计稿的宽度除以10。如设计稿宽750，则值为75。",
+        "eg": "75",
+        "must": false,
+        "default": '75'
+    }, {
+        "key": "compileCss",
+        "desc": "CSS编译方式，指定CSS是以某种方式开发的，可选值：less, css，推荐less方式开发。",
+        "eg": "less",
+        "must": false,
+        "default": 'css'
+    }, {
+        "key": "minImg",
+        "desc": "是否启用图片压缩，配置值：true（开启）， false（关闭）",
+        "eg": "false",
+        "must": false,
+        "default": false
+    }, {
+        "key": "minLevel",
+        "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。智能判断可压缩的空间，存在最大只能压缩到一定程序，参数值增加不会产生效果。",
+        "eg": "3",
+        "must": false,
+        "default": 3
+    }, {
+        "key": "svn",
+        "desc": "项目SVN地址",
+        "eg": "http://xx.xxx.x.xx:9999/svn/ui/hn/2017",
+        "must": false,
+        "default": ''
+    }
+];
 
 /**
  * 以某元素为索引数组去重，如果出现重复则合并
@@ -295,7 +296,7 @@ let proSn = '',
     proName = '',
     proTitle = '',
     deviceType = '',
-    remUnit = '',
+    remUnit = 75,
     compileCssType = '',
     minImg = false, // 是否开启图片压缩
     minLevel = 3, // 压缩等级 0-7，值越大越压缩大
@@ -305,6 +306,7 @@ proSn = gutil.env.sn ? gutil.env.sn : '';
 // 传入项目名称方式执行任务
 proName = gutil.env.pro ? gutil.env.pro : '';
 
+// 从项目列表中提取当前项目配置参数详情
 if (proSn === '') {
     for (let pro of proList.pro) {
         if (pro.name === proName) {
@@ -312,7 +314,8 @@ if (proSn === '') {
             proSn = pro.sn;
             proTitle = pro.title;
             deviceType = pro.dev;
-            remUnit = pro.remUnit;
+            remUnit = pro.remUnit ? pro.remUnit : 75;
+            proConf.remUnit = remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
             proConf.compileCssType = compileCssType;
             minImg = (pro.minImg != undefined) ? pro.minImg : false;
@@ -330,7 +333,8 @@ if (proSn === '') {
             proName = pro.name;
             proTitle = pro.title;
             deviceType = pro.dev;
-            remUnit = pro.remUnit;
+            remUnit = pro.remUnit ? pro.remUnit : 75;
+            proConf.remUnit = remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
             proConf.compileCssType = compileCssType;
             minImg = (pro.minImg != undefined) ? pro.minImg : false;
@@ -441,18 +445,16 @@ function checkProParam() {
  * 检查 重加载任务 参数是否正确
  */
 function checkReloadParam() {
-    if (proName === '' && proSn === '') {
+    // 同者都没有传入
+    // 或 传入了 项目名称，但没有匹配到项目编码
+    // 或 传入了 项目编码，但没有匹配到项目名称
+    if (proName === '' || proSn === '') {
         console.log('ERR:: ' + cError('The project param is error, or the project config is gone, please check!'));
         process.exit();
-    } else {
-        // 传入了 项目名称
-        if (proName != '' && proSn === '') {
-
-        }
-
-        // 传入了 项目编码
-        if (proName === '' && proSn != '') {
-        }
+    } else if (!fs.existsSync(proArchiveDir)) {
+        // 项目信息有匹配到，现在检查目录是否存在
+        console.log('ERR:: ' + cError('The project archive directory is not exists, please check!'));
+        process.exit();
     }
 }
 
@@ -495,7 +497,7 @@ switch (gulpAction) {
     case 'reload':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目重加载');
-        checkProParam();
+        checkReloadParam();
         printProHead();
         break;
     case 'release':
@@ -516,10 +518,6 @@ switch (gulpAction) {
         checkProParam();
         checkProDir();
         printProHead();
-        break;
-    case 'test':
-        console.log('==================================================================');
-        console.log('-- 脚本测试任务');
         break;
     case 'list':
         console.log('==================================================================');
@@ -542,7 +540,6 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
         checkProParam();
-        // checkProDir();
         printProHead();
         break;
     case 'search':
@@ -553,6 +550,10 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 软件升级');
         break;
+    case 'test':
+        console.log('==================================================================');
+        console.log('-- 脚本测试任务');
+        break;
     default :
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目自动监控');
@@ -562,6 +563,7 @@ switch (gulpAction) {
         break;
 }
 
+// ==================================================================
 // 列出当前工程下所管理的所有项目信息
 gulp.task('list', function () {
     console.log('-- ' + cTitle('项目总数:: ') + cSuccess(proList.pro.length));
@@ -571,6 +573,7 @@ gulp.task('list', function () {
     }
 });
 
+// ==================================================================
 // 列出以关键词搜索到的项目信息
 gulp.task('search', function () {
     let searchKey = gutil.env.key ? gutil.env.key : '';
@@ -593,6 +596,7 @@ gulp.task('search', function () {
     }
 });
 
+// ==================================================================
 // 列出项目所包含的页面信息
 gulp.task('listpages', function () {
     let confPath = './src/' + proName + '/config/data.js';
@@ -650,12 +654,14 @@ gulp.task('copy', ['clean'], function () {
     return merge(lib, img, js);
 });
 
+// ==================================================================
 // 清除缓存
 // 当图片压缩的配置参数修改后，需要清除一次缓存
 gulp.task('clear:cache', function () {
     return cache.clearAll();
 });
 
+// ==================================================================
 // 项目归档，将已开发完成的项目归档到对应的文件夹中
 // task action:: archive
 let archiveFileArr = [proSrcDir + '/**/*', proViewDir + '/**/*', proWwwDir + '/**/*'];
@@ -694,6 +700,7 @@ gulp.task('archive:del', ['archive:zip'], function () {
 
 gulp.task('archive', ['archive:zip']);
 
+// ==================================================================
 // combine all project config to a js file
 gulp.task('comb:conf', function () {
     let confStr = JSON.stringify(proList);
@@ -701,6 +708,7 @@ gulp.task('comb:conf', function () {
     fs.writeFileSync(combConfPath, confStr);
 });
 
+// ==================================================================
 // config the project
 gulp.task('conf', function () {
     for (let param in gutil.env) {
@@ -720,6 +728,7 @@ gulp.task('conf', function () {
     }
 });
 
+// ==================================================================
 // 删除项目源码，请注意，本操作有风险，删除后无法找回
 let proDirArr = [proSrcDir, proViewDir, proWwwDir, './src/common/config/pro/' + archiveConfFileName];
 // task action:: delpro
@@ -727,6 +736,7 @@ gulp.task('delpro', function () {
     del(proDirArr);
 });
 
+// ==================================================================
 // 项目重新加载，项目归档操作的反操作。将已归档的项目源码，重新加载到开发环境中，便于持续开发。
 // task action:: reload
 gulp.task('reload', function () {
@@ -864,19 +874,24 @@ let lessArr = [
     srcDir + '/css/less/comm*.less',
 ];
 
+// 不同设备场景下的CSS文件命名
 let cssSrc = {
+    // 将编译并合并为: comm.css
     'comm': [
         srcDir + '/css/src/main*.css',
         srcDir + '/css/src/comm*.css'
     ],
+    // 将编译并合并为: web.css
     'web': [
         srcDir + '/css/src/web*.css'
     ],
+    // 将编译并合并为: wap.css
     'wap': [
         srcDir + '/css/src/wap*.css'
     ]
 };
 
+// 不同设备场景下的LESS文件命名
 let lessSrc = {
     'comm': [
         srcDir + '/css/less/main*.less',
@@ -991,6 +1006,7 @@ gulp.task('groupGrace', beforeGraceWorks, groupFiles(cssConcatSrc, function (nam
         .pipe(gulp.dest(srcDir + '/css'));
 }));
 
+// ==================================================================
 // 项目编译任务，包括CSS、JS等
 // task action:: make
 gulp.task('make', ['groupGrace']);
@@ -1094,6 +1110,7 @@ gulp.task('initdir', function () {
     }
 });
 
+// ==================================================================
 // 初始化，创建目录结构后，复制基本文件
 // task action:: init
 gulp.task('init', ['initdir'], function () {
@@ -1106,6 +1123,7 @@ gulp.task('init', ['initdir'], function () {
     return merge(src, view, www);
 });
 
+// ==================================================================
 // 项目发布任务，发布到指定的文件夹，以及打包压缩
 // task action:: dist
 gulp.task('dist', ['copy', 'css'], function () {
@@ -1127,6 +1145,7 @@ gulp.task('dist', ['copy', 'css'], function () {
     });
 });
 
+// ==================================================================
 // the task of release framework
 // 用于发布自动化框架构建源码
 // task action:: release
@@ -1236,6 +1255,8 @@ function compareVer(curV, reqV) {
     }
 }
 
+// ==================================================================
+// aiflow工具版本更新
 gulp.task('update', function () {
     let releaseZips = fs.readdirSync(releaseRootDir);
     let curVer = packageConf.version;
@@ -1311,11 +1332,13 @@ gulp.task('update', function () {
     console.log('------------------------------------------------------------------');
 });
 
+// ==================================================================
 // the default task
 // 默认任务，用户于监控文件的变动，并对变动的文件实时编译，同时刷新所有浏览器终端
 // task action:: default
 gulp.task('default', ['watch', 'browser-sync']);
 
+// ==================================================================
 // the test task
 // 开发过程中，对于任务的相关测试，或是调试性写法，尝试等，可以写在这里
 // task action:: test
