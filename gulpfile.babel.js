@@ -1011,6 +1011,8 @@ gulp.task('release', function () {
         wwwDir + '/*.*',
         wwwDir + '/commLib/**',
         wwwDir + '/commLib/**/*.*',
+        wwwDir + '/static/home/**',
+        wwwDir + '/static/home/**/*.*',
         wwwDir + '/static/init/**',
         wwwDir + '/static/init/**/*.*',
     ];

@@ -14,11 +14,14 @@
           href="/static/home/src/lib/Semantic-UI-2.2.9/dist/semantic.min.css"/>
     <link rel="stylesheet" type="text/css"
           href="/static/home/src/lib/DataTables-1.10.13/dataTables.semanticui.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="/static/home/src/lib/DataTables-1.10.13/fixedHeader.semanticui.min.css"/>
 
     <script type="text/javascript" src="/static/home/src/lib/jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="/static/home/src/lib/DataTables-1.10.13/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="/static/home/src/lib/DataTables-1.10.13/dataTables.semanticui.min.js"></script>
     <script type="text/javascript" src="/static/home/src/lib/Semantic-UI-2.2.9/dist/semantic.min.js"></script>
+    <script type="text/javascript" src="/static/home/src/lib/DataTables-1.10.13/dataTables.fixedHeader.min.js"></script>
     <style type="text/css">
         body, body a {
             text-align: center;
@@ -28,6 +31,21 @@
 
         a {
             color: orange;
+        }
+
+        body::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            background-color: #fff;
+        }
+
+        body::-webkit-scrollbar {
+            width: 6px;
+            background-color: #ccc;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background-color: #bbb;
+            border-radius: 6px;
         }
 
         .proList {
@@ -57,7 +75,9 @@
     </style>
     <script type="text/javascript">
         $(function () {
-            $('.proListTable').DataTable();
+            $('.proListTable').DataTable({
+                fixedHeader: true
+            });
         });
     </script>
 </head>
@@ -67,7 +87,7 @@
 </div>
 
 <div class="proList">
-    <table class="proListTable ui celled table">
+    <table class="proListTable ui celled table" data-page-length="25">
         <thead>
         <tr>
             <th class="proNum">项目编号</th>
