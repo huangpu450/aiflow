@@ -33,6 +33,7 @@ import jsbeautify from 'js-beautify';
 let beautify = jsbeautify.js_beautify;
 import jseditor from 'gulp-json-editor';
 import imagemin from 'gulp-imagemin';
+import cache from 'gulp-cache';
 
 /**
  * 以某元素为索引数组去重
@@ -212,6 +213,8 @@ let proSn = '',
     deviceType = '',
     remUnit = '',
     compileCssType = '',
+    minImg = false, // 是否开启图片压缩
+    minLevel = 3, // 压缩等级 0-7，值越大越压缩大
     proConf = '';
 // 项目序列号
 proSn = gutil.env.sn ? gutil.env.sn : '';
@@ -227,6 +230,11 @@ if (proSn === '') {
             deviceType = pro.dev;
             remUnit = pro.remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
+            proConf.compileCssType = compileCssType;
+            minImg = (pro.minImg != undefined) ? pro.minImg : false;
+            proConf.minImg = minImg;
+            minLevel = (pro.minLevel && pro.minLevel >= 0 && pro.minLevel <= 7) ? pro.minLevel : 3;
+            proConf.minLevel = minLevel;
             break;
         }
     }
@@ -240,6 +248,11 @@ if (proSn === '') {
             deviceType = pro.dev;
             remUnit = pro.remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
+            proConf.compileCssType = compileCssType;
+            minImg = (pro.minImg != undefined) ? pro.minImg : false;
+            proConf.minImg = minImg;
+            minLevel = (pro.minLevel && pro.minLevel >= 0 && pro.minLevel <= 7) ? pro.minLevel : 3;
+            proConf.minLevel = minLevel;
             break;
         }
     }
@@ -426,6 +439,10 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 项目列表');
         break;
+    case 'clear:cache':
+        console.log('==================================================================');
+        console.log('-- 清除图片压缩处理缓存');
+        break;
     case 'listpages':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
@@ -518,13 +535,30 @@ gulp.task('clean', function () {
 // 发布到新的目录
 gulp.task('copy', ['clean'], function () {
     let lib = gulp.src(srcDir + '/lib/**')
-        .pipe(gulp.dest(distDir + '/lib/'))
-    let img = gulp.src(srcDir + '/images/*.{png,jpg,jpeg,gif,ico}')
-        .pipe(imagemin())
-        .pipe(gulp.dest(distDir + '/images/'))
+        .pipe(gulp.dest(distDir + '/lib/'));
+    let img;
+    if (minImg) {
+        img = gulp.src(srcDir + '/images/**')
+            .pipe(cache(imagemin({
+                // optimizationLevel: minLevel, // 0-7，优化等级，默认3
+                progressive: true, // 无损压缩JPG图片，默认 false
+                interlaced: true, // 隔行扫描gif进行渲染，默认 false
+                multipass: true, // 多次优化SVG直到完全优化 默认 false
+            })))
+            .pipe(gulp.dest(distDir + '/images/'));
+    } else {
+        img = gulp.src(srcDir + '/images/**')
+            .pipe(gulp.dest(distDir + '/images/'));
+    }
     let js = gulp.src(srcDir + '/js/**')
-        .pipe(gulp.dest(distDir + '/js/'))
+        .pipe(gulp.dest(distDir + '/js/'));
     return merge(lib, img, js);
+});
+
+// 清除缓存
+// 当图片压缩的配置参数修改后，需要清除一次缓存
+gulp.task('clear:cache', function () {
+    return cache.clearAll();
 });
 
 // 项目归档，将已开发完成的项目归档到对应的文件夹中
