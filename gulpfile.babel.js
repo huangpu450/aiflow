@@ -36,7 +36,7 @@ import imagemin from 'gulp-imagemin';
 import cache from 'gulp-cache';
 
 /**
- * 以某元素为索引数组去重
+ * 以某元素为索引数组去重，如果出现重复则合并
  * @param key
  * @returns {[*]}
  */
@@ -454,8 +454,7 @@ switch (gulpAction) {
         break;
     case 'conf':
         console.log('==================================================================');
-        console.log('-- 配置项目参数');
-        console.log('-- 配置项目名称:: ' + cTitle(proName));
+        console.log('-- 配置项目参数:: ' + cTitle(proName));
         checkProParam();
         break;
     case 'listpages':
