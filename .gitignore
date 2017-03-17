@@ -40,6 +40,7 @@ view/*
 www/static/*
 # Except these dir
 !src/common
+src/common/config/pro.js
 !src/home
 !src/init
 !view/common
