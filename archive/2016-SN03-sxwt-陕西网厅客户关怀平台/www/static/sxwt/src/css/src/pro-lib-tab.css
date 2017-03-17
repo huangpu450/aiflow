@@ -1,0 +1,106 @@
+@import "./pro-lib-var.css";
+
+.aiui-tab .tab-title {
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 2px solid var(--main-color-red);
+}
+
+.aiui-tab .tab-box {
+    width: 100%;
+    background-color: #fff;
+    padding: 15px 0;
+    clear: fix;
+}
+
+.aiui-tab .tab-box .tab-panel {
+    margin: 0 10px;
+    clear: fix;
+    display: none;
+}
+
+.tab-title a:hover {
+    text-decoration: none;
+    color: var(--main-color-red);
+}
+
+.tab-title h1 {
+    float: left;
+    height: 40px;
+    line-height: 40px;
+    background-color: var(--main-color-red);
+    text-align: left;
+    padding: 0 10px;
+    font-size: 20px;
+    color: #fff;
+    font-weight: normal;
+}
+
+.tab-title h1 * {
+    float: left;
+    padding-left: 5px;
+}
+
+.tab-title h1 span {
+    margin-top: -2px;
+}
+
+.tab-title h1 i {
+    font-size: 30px;
+    line-height: 40px;
+}
+
+.tab-title img {
+    float: left;
+}
+
+.tab-title .tab-nav {
+    clear: fix;
+    float: left;
+    margin-top: 10px;
+}
+
+.tab-title .tab-nav.tab-nav-right {
+    float: right;
+}
+
+.tab-nav > li {
+    float: left;
+    position: relative;
+    width: 70px;
+    height: 30px;
+}
+
+.tab-nav > li.active {
+    background-color: #fff;
+    border: 2px solid var(--main-color-red);
+    border-bottom: none;
+}
+
+.tab-nav a,
+.tab-title a {
+    display: block;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+}
+
+.tab-title a.more {
+    width: 70px;
+    float: right;
+    margin-top: 10px;
+}
+
+.tab-nav > li.active a {
+    background-color: #fff;
+    color: var(--main-color-red);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+
+
+
+

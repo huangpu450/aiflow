@@ -35,9 +35,9 @@ app/
 runtime/
 
 # Ignore other project files
-src/
-view/
-www/static/
+src/*
+view/*
+www/static/*
 # Except these dir
 !src/common
 !src/home

@@ -1,0 +1,100 @@
+@import "./pro-lib-var.css";
+
+.row.row_duihuan {
+    width: 1200px;
+    margin: 20px auto 0;
+    clear: fix;
+}
+
+.duihuan-list li {
+    width: 236px;
+    height: 330px;
+    float: left;
+    z-index: 0;
+}
+
+.duihuan-box {
+    width: 224px;
+    clear: fix;
+    float: left;
+    background-color: var(--bg-color-1);
+    border: 1px solid var(--bg-color-3);
+    position: relative;
+    margin: 10px 5px;
+}
+
+.duihuan-list li:hover .duihuan-box,
+.duihuan-box.active {
+    z-index: 1;
+    box-shadow: 0 0 5px var(--bg-color-4);
+}
+
+.duihuan-box .box-img {
+    padding: 20px;
+    background: url('../images/d_01.png') center bottom repeat-x #fff;
+    position: relative;
+    text-align: center;
+}
+
+.duihuan-box .box-img .box-tag {
+    position: absolute;
+    right: 0;
+    top: 3px;
+    background: url('../images/bg_tag.png') no-repeat;
+    text-align: center;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    width: image-width;
+    height: image-height;
+    line-height: image-height;
+}
+
+.duihuan-box .box-img img {
+    width: 174px;
+    height: 174px;
+    margin: 0 auto;
+}
+
+.duihuan-box .box-buy {
+    padding: 10px;
+}
+
+.duihuan-box .box-buy h1 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.duihuan-box .box-buy .bt {
+    width: 175px;
+    height: 30px;
+    line-height: 30px;
+    display: block;
+    color: var(--main-color-red);
+    font-size: 16px;
+    border: 1px solid var(--main-color-red);
+    background-color: #fff;
+    border-radius: 4px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.duihuan-box .box-buy .bt:hover {
+    text-decoration: none;
+    background-color: var(--main-color-red);
+    color: #fff;
+}
+
+.duihuan-box .box-info {
+    font-size: 12px;
+    line-height: 16px;
+    background-color: var(--bg-color-1);
+    display: none;
+    color: var(--font-light-color);
+    padding-bottom: 15px;
+}
+
+.duihuan-list li:hover .duihuan-box .box-info,
+.duihuan-box.active .box-info {
+    display: block;
+}

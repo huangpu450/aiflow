@@ -1,0 +1,22 @@
+.row_nav {
+    background-color: #fff;
+    width: 100%;
+    height: 95px;
+    position: relative;
+    z-index: 9;
+}
+
+.row_nav .row_nav_con {
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.row_nav .row_nav_con img {
+    float: left;
+    margin-top: 22px;
+    margin-right: 20px;
+}
+
+.row_nav .row_nav_con .logo_2 img {
+    margin-top: 18px;
+}
