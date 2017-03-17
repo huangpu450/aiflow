@@ -74,6 +74,7 @@ import appConfig from './src/common/config/config';
 const aiproConfPath = './src/common/config';
 const aiproConfPre = appConfig.pro_conf_pref; //aipro
 const tmpAiproConfPath = './src/common/config/pro';
+const combConfPath = aiproConfPath + '/pro.js';
 // 定义项目相关路径常量
 const rootDir = './';
 const logicDir = 'src';
@@ -443,6 +444,10 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 清除图片压缩处理缓存');
         break;
+    case 'comb:conf':
+        console.log('==================================================================');
+        console.log('-- 合并所有项目配置文件为一个');
+        break;
     case 'listpages':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
@@ -598,6 +603,13 @@ gulp.task('archive:del', ['archive:zip'], function () {
 });
 
 gulp.task('archive', ['archive:zip']);
+
+// combine all project config to a js file
+gulp.task('comb:conf', function () {
+    let confStr = JSON.stringify(proList);
+    confStr = "export default " + beautify(confStr, {indent_size: 2});
+    fs.writeFileSync(combConfPath, confStr);
+});
 
 // 删除项目源码，请注意，本操作有风险，删除后无法找回
 let proDirArr = [proSrcDir, proViewDir, proWwwDir, './src/common/config/pro/' + archiveConfFileName];
