@@ -39,6 +39,8 @@ export default {
             // less\css\sass\postcss
             // 当前仍只支持前两种
             compileCss: 'less',
+            minImg: true,
+            //minLevel: 2,
             svn: ''
         }
     ]

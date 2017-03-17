@@ -1,3 +1,11 @@
+.testdom {
+  background: rgba(0, 0, 0, .3);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4c000000', endColorstr='#4c000000');
+}
+:root .testdom {
+  filter: none\9;
+}
+
 /* AIUI Grid */
 /* the normal style */
 .container {
@@ -8,12 +16,12 @@
     *zoom: 1;
 }
 .container:after {
-    clear: both;
+  clear: both;
 }
 .container:before,
 .container:after {
-    content: '';
-    display: table;
+  content: '';
+  display: table;
 }
 .row {
     margin: 0;
@@ -21,12 +29,12 @@
     *zoom: 1;
 }
 .row:after {
-    clear: both;
+  clear: both;
 }
 .row:before,
 .row:after {
-    content: '';
-    display: table;
+  content: '';
+  display: table;
 }
 .col {
     float: left;
@@ -275,12 +283,12 @@
     *zoom: 1;
 }
 .container-fluid:after {
-    clear: both;
+  clear: both;
 }
 .container-fluid:before,
 .container-fluid:after {
-    content: '';
-    display: table;
+  content: '';
+  display: table;
 }
 body {
   background-color: #cd1b23;
@@ -301,12 +309,12 @@ body a:hover {
   *zoom: 1;
 }
 .container-fluid:after {
-    clear: both;
+  clear: both;
 }
 .container-fluid:before,
 .container-fluid:after {
-    content: '';
-    display: table;
+  content: '';
+  display: table;
 }
 .row_banner {
   height: 620px;

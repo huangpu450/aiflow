@@ -1,3 +1,12 @@
+.testdom {
+  background: rgba(0, 0, 0, .3);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4c000000', endColorstr='#4c000000');
+}
+
+:root .testdom {
+  filter: none\9;
+}
+
 /* AIUI Grid */
 
 /* the normal style */
@@ -304,6 +313,12 @@
 .container-fluid:after {
   content: '';
   display: table;
+}
+
+:root {
+  --breakpoint-sm: '10.24rem';
+  --breakpoint-md: '13.226667rem';
+  --breakpoint-lg: '16rem';
 }
 
 body {

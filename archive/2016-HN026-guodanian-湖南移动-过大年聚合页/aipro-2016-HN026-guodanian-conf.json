@@ -7,5 +7,8 @@
   "date": "2016-11-30",
   "remUnit": 75,
   "compileCss": "less",
-  "svn": ""
+  "svn": "",
+  "compileCssType": "less",
+  "minImg": true,
+  "minLevel": 7
 }
