@@ -35,6 +35,110 @@ import jseditor from 'gulp-json-editor';
 import imagemin from 'gulp-imagemin';
 import cache from 'gulp-cache';
 
+// 项目配置信息
+import packageConf from './package.json';
+import initList from './src/common/config/initpro';
+import appConfig from './src/common/config/config';
+// 配置信息常量
+const aiproConfPath = './src/common/config';
+const aiproConfPre = appConfig.pro_conf_pref; //aipro
+const tmpAiproConfPath = './src/common/config/pro';
+const combConfPath = aiproConfPath + '/pro.js';
+// 定义项目相关路径常量
+const rootDir = './';
+const logicDir = 'src';
+const viewDir = 'view';
+const wwwDir = 'www';
+const archiveDir = 'archive';
+const releaseRootDir = rootDir + 'releases';
+const initSrcDir = logicDir + '/init';
+const initViewDir = viewDir + '/init';
+const initWwwDir = wwwDir + '/static/init';
+const gulpAction = gutil.env._[0];
+
+let proList = {};
+
+// 项目配置信息模板
+let confInfoArr = [{
+    "key": "sn",
+    "desc": "项目编号，由英文、数字、-、_组合而成，必须唯一。",
+    "eg": "2016-HN001",
+    "must": true,
+    "default": ''
+}, {
+    "key": "name",
+    "desc": "项目编码，由英文、数字、下划线组成的字符串，不区分大小写，必须唯一",
+    "eg": "guodanian",
+    "must": true,
+    "default": ''
+}, {
+    "key": "title",
+    "desc": "项目标题",
+    "eg": "湖南移动-过大年聚合页",
+    "must": true,
+    "default": ''
+}, {
+    "key": "title",
+    "desc": "项目标题",
+    "eg": "湖南移动-过大年聚合页",
+    "must": true,
+    "default": ''
+}, {
+    "key": "author",
+    "desc": "项目作者，及相关的开发人员",
+    "eg": "张三，李四",
+    "must": false,
+    "default": ''
+}, {
+    "key": "type",
+    "desc": "项目类型，指定项目属于哪种类型：WEB、WAP",
+    "eg": "PC",
+    "must": false,
+    "default": ''
+}, {
+    "key": "dev",
+    "desc": "项目展示的平台类型，PC、PHONE、ALL",
+    "eg": "PHONE",
+    "must": false,
+    "default": ''
+}, {
+    "key": "date",
+    "desc": "项目创建日期",
+    "eg": "2016-12-10",
+    "must": false,
+    "default": ''
+}, {
+    "key": "remUnit",
+    "desc": "REM单位换算单元值，即设计稿的宽度除以10。如设计稿宽750，则值为75。",
+    "eg": "75",
+    "must": false,
+    "default": ''
+}, {
+    "key": "compileCss",
+    "desc": "CSS编译方式，指定CSS是以某种方式开发的，可选值：less, css，推荐less方式开发。",
+    "eg": "less",
+    "must": false,
+    "default": 'css'
+}, {
+    "key": "minImg",
+    "desc": "是否启用图片压缩，配置值：true（开启）， false（关闭）",
+    "eg": "false",
+    "must": false,
+    "default": false
+}, {
+    "key": "minLevel",
+    "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。智能判断可压缩的空间，存在最大只能压缩到一定程序，参数值增加不会产生效果。",
+    "eg": "3",
+    "must": false,
+    "default": 3
+}, {
+    "key": "svn",
+    "desc": "项目SVN地址",
+    "eg": "http://10.13.4.242:9999/svn/ui/hn/2017",
+    "must": false,
+    "default": ''
+}];
+
 /**
  * 以某元素为索引数组去重，如果出现重复则合并
  * @param key
@@ -67,29 +171,6 @@ Array.prototype.unique = function (key) {
     }
     return n;
 }
-
-// 项目配置信息
-import packageConf from './package.json';
-import initList from './src/common/config/initpro';
-import appConfig from './src/common/config/config';
-// 配置信息常量
-const aiproConfPath = './src/common/config';
-const aiproConfPre = appConfig.pro_conf_pref; //aipro
-const tmpAiproConfPath = './src/common/config/pro';
-const combConfPath = aiproConfPath + '/pro.js';
-// 定义项目相关路径常量
-const rootDir = './';
-const logicDir = 'src';
-const viewDir = 'view';
-const wwwDir = 'www';
-const archiveDir = 'archive';
-const releaseRootDir = rootDir + 'releases';
-const initSrcDir = logicDir + '/init';
-const initViewDir = viewDir + '/init';
-const initWwwDir = wwwDir + '/static/init';
-const gulpAction = gutil.env._[0];
-
-let proList = {};
 
 /**
  * 获取所有项目配置信息
