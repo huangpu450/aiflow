@@ -175,7 +175,9 @@ Array.prototype.unique = function (key) {
                     if (arr[i][key] == n[j][key]) {
                         has = true;
                         // 使用靠后的值作为新值
-                        n[j] = arr[i];
+                        // n[j] = arr[i];
+                        // 合并两个值
+                        n[j] = Object.assign(n[j], arr[i]);
                         break inner;
                     }
                 }

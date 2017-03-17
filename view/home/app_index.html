@@ -54,7 +54,7 @@
             text-align: left;
         }
 
-        .proNum, .proType, .proDate, .proDist {
+        .proNum, .proType, .proDate, .proDist, .proAuthor, .proCode {
             width: 100px;
         }
 
@@ -91,8 +91,10 @@
         <thead>
         <tr>
             <th class="proNum">项目编号</th>
+            <th class="proCode">项目编码</th>
             <th class="proName">项目名称</th>
             <th class="proType">项目类型</th>
+            <th class="proAuthor">项目作者</th>
             <th class="proDate">立项日期</th>
             <th class="proDist">项目发布</th>
             <th class="proArchive">项目归档</th>
@@ -102,8 +104,10 @@
         {% for pro in proList.pro %}
         <tr>
             <td class="proNum">{{pro.sn | upper}}</td>
+            <td class="proCode">{{pro.name}}</td>
             <td class="proName"><a href="/{{pro.name}}" target="_blank">{{ pro.title }}</a></td>
             <td class="proType">{{pro.type}}</td>
+            <td class="proType">{{pro.author}}</td>
             <td class="proDate">{{pro.date}}</td>
             <td class="proDist"><a href="/static/{{pro.name}}/dist/index.html" target="_blank">查看发布</a></td>
             <td class="proArchive">

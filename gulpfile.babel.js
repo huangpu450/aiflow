@@ -53,7 +53,9 @@ Array.prototype.unique = function (key) {
                     if (arr[i][key] == n[j][key]) {
                         has = true;
                         // 使用靠后的值作为新值
-                        n[j] = arr[i];
+                        // n[j] = arr[i];
+                        // 合并两个值
+                        n[j] = Object.assign(n[j], arr[i]);
                         break inner;
                     }
                 }
@@ -267,6 +269,8 @@ const proViewDir = viewDir + '/' + proName;
 const proWwwDir = wwwDir + '/static/' + proName;
 const proArchiveDir = archiveDir + '/' + proSn + '-' + proName + '-' + proTitle;
 const archiveConfFileName = aiproConfPre + '-' + proSn + '-' + proName + '-conf.json';
+const archiveConfFilePath = proArchiveDir + '/' + archiveConfFileName;
+const devConfFilePath = logicDir + '/common/config/pro/' + archiveConfFileName;
 
 /**
  * 读取归档后的项目配置信息
@@ -448,6 +452,12 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 合并所有项目配置文件为一个');
         break;
+    case 'conf':
+        console.log('==================================================================');
+        console.log('-- 配置项目参数');
+        console.log('-- 配置项目名称:: ' + cTitle(proName));
+        checkProParam();
+        break;
     case 'listpages':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
@@ -609,6 +619,25 @@ gulp.task('comb:conf', function () {
     let confStr = JSON.stringify(proList);
     confStr = "export default " + beautify(confStr, {indent_size: 2});
     fs.writeFileSync(combConfPath, confStr);
+});
+
+// config the project
+gulp.task('conf', function () {
+    for (let param in gutil.env) {
+        if (param != '_' && param != 'pro' && param != 'sn') {
+            proConf[param] = gutil.env[param];
+        }
+    }
+    let confStr = JSON.stringify(proConf);
+    confStr = beautify(confStr, {indent_size: 2});
+    if (fs.existsSync(archiveConfFilePath)) {
+        // 如果归档目录中有该项目
+        fs.writeFileSync(archiveConfFilePath, confStr);
+    }
+    if (fs.existsSync(srcDir)) {
+        // 如果该项目存在于开发目录中
+        fs.writeFileSync(devConfFilePath, confStr);
+    }
 });
 
 // 删除项目源码，请注意，本操作有风险，删除后无法找回
@@ -1216,4 +1245,8 @@ gulp.task('test', function () {
     // console.log(moment().format('YYYYMMDDHHmmss'))
     gutil.log('stuff happened', 'Really it did', gutil.colors.magenta('123'));
     console.log(gutil.env);
+    let obj1 = {foo: 123};
+    let obj2 = {foo: 321, bar: false};
+    Object.assign(obj1, obj2);
+    console.log(obj1);
 });
