@@ -899,10 +899,14 @@ gulp.task('conf:format', function () {
 gulp.task('conf', function () {
     let configSuc = false;
     for (let param in gutil.env) {
+        // 修复配置值的数据类型
+        gutil.env[param] = gutil.env[param] == 'undefined' ? undefined : gutil.env[param];
+        gutil.env[param] = gutil.env[param] == 'true';
+
         // sn, name, title 三个参数不可配置
         // 值不相同时才可配置
         if (param != '_' && param != 'pro' && param != 'sn' && !['sn', 'name', 'title'].includes(gutil.env[param]) && proConf[param] != gutil.env[param]) {
-            proConf[param] = gutil.env[param] == 'undefined' ? undefined : gutil.env[param];
+            proConf[param] = gutil.env[param];
             // 如果配置为 undefined，则删除该属性
             if (gutil.env[param] == undefined) {
                 console.log('undefined');
