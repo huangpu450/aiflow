@@ -1,14 +1,15 @@
 {
-  "sn": "2016-HN026",
-  "name": "guodanian",
-  "title": "湖南移动-过大年聚合页",
-  "type": "web",
-  "dev": "pc",
-  "date": "2016-11-30",
-  "remUnit": 75,
-  "compileCss": "less",
-  "svn": "",
-  "compileCssType": "less",
-  "minImg": true,
-  "minLevel": 7
+    "sn": "2016-HN026",
+    "name": "guodanian",
+    "title": "湖南移动-过大年聚合页",
+    "dev": "pc",
+    "author": "liyz,susj",
+    "type": "web",
+    "date": "2016-11-30",
+    "remUnit": 75,
+    "compileCss": "less",
+    "minImg": false,
+    "minLevel": 5,
+    "svn": "",
+    "remark": ""
 }
