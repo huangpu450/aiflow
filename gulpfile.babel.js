@@ -27,6 +27,7 @@ let cNotice = color.blue;
 let cSuccess = color.green;
 let cInfo = color.cyan;
 let cTitle = color.magenta.bold;
+let cText = color.white;
 import browserS from 'browser-sync';
 let browserSync = browserS.create();
 import nodeUnique from 'node-unique-array';
@@ -83,7 +84,7 @@ let confInfoArr = [
         "default": ''
     }, {
         "key": "dev",
-        "desc": "项目展示的平台类型，可用于决定CSS的编译方式，可选值:: pc/phone",
+        "desc": "项目展示的平台类型，可用于决定CSS的编译方式。\n       可选值:: pc/phone",
         "eg": "phone",
         "must": true,
         "default": 'pc'
@@ -97,7 +98,7 @@ let confInfoArr = [
         "default": ''
     }, {
         "key": "type",
-        "desc": "项目类型，指定项目属于哪种类型，会在哪种场景下展示，可选值:: web/wap/all",
+        "desc": "项目类型，指定项目属于哪种类型，会在哪种场景下展示。\n       可选值:: web/wap/all",
         "eg": "web",
         "must": false,
         "default": ''
@@ -115,7 +116,7 @@ let confInfoArr = [
         "default": '75'
     }, {
         "key": "compileCss",
-        "desc": "CSS编译方式，指定CSS是以某种方式开发的，可选值：less, css，推荐less方式开发。",
+        "desc": "CSS编译方式，指定CSS是以某种方式开发的。\n       可选值：less, css，推荐less方式开发。",
         "eg": "less",
         "must": false,
         "default": 'css'
@@ -127,7 +128,7 @@ let confInfoArr = [
         "default": false
     }, {
         "key": "minLevel",
-        "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。智能判断可压缩的空间，存在最大只能压缩到一定程序，参数值增加不会产生效果。",
+        "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。\n       智能判断可压缩的空间，存在最大只能压缩到一定程序，\n       参数值增加不会产生效果。",
         "eg": "3",
         "must": false,
         "default": 3
@@ -519,7 +520,7 @@ switch (gulpAction) {
         checkProDir();
         printProHead();
         break;
-    case 'list':
+    case 'list:pro':
         console.log('==================================================================');
         console.log('-- 项目列表');
         break;
@@ -527,16 +528,20 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 清除图片压缩处理缓存');
         break;
-    case 'comb:conf':
+    case 'conf:comb':
         console.log('==================================================================');
         console.log('-- 合并所有项目配置文件为一个');
+        break;
+    case 'conf:help':
+        console.log('==================================================================');
+        console.log('-- 项目配置帮助信息');
         break;
     case 'conf':
         console.log('==================================================================');
         console.log('-- 配置项目参数:: ' + cTitle(proName));
         checkProParam();
         break;
-    case 'listpages':
+    case 'list:pages':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
         checkProParam();
@@ -565,11 +570,39 @@ switch (gulpAction) {
 
 // ==================================================================
 // 列出当前工程下所管理的所有项目信息
-gulp.task('list', function () {
+gulp.task('list:pro', function () {
     console.log('-- ' + cTitle('项目总数:: ') + cSuccess(proList.pro.length));
     for (let pro of proList.pro) {
         printProInfo(pro);
         console.log(' ');
+    }
+});
+
+// ==================================================================
+// 列出项目所包含的页面信息
+gulp.task('list:pages', function () {
+    let confPath = './src/' + proName + '/config/data.js';
+    let archiveConfPath = './archive/' + proSn + '-' + proName + '-' + proTitle + '/src/' + proName + '/config/data.js';
+    let confExist = fs.existsSync(confPath);
+    let archiveConfExist = fs.existsSync(archiveConfPath);
+    let realPath;
+    if (confExist) {
+        realPath = confPath;
+    } else if (archiveConfExist) {
+        realPath = archiveConfPath;
+    }
+    let pagesData = require(realPath);
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + proTitle + ' 项目页面信息');
+    let pagesCount = Object.keys(pagesData.default.pages).length;
+    console.log('-- ' + cTitle('页面总数:: ') + cSuccess(pagesCount));
+    for (let page in pagesData.default.pages) {
+        let pageObj = pagesData.default.pages[page];
+        console.log('------------------------------------------------------------------');
+        console.log('-- Page title:: ' + cInfo(pageObj.title));
+        console.log('-- Page file name:: ' + cInfo(pageObj.action + '.html'));
+        console.log('-- ');
+        console.log('------------------------------------------------------------------');
     }
 });
 
@@ -593,34 +626,6 @@ gulp.task('search', function () {
     } else {
         console.log('ERR:: ' + cError('The search keywords is empty, please check!'));
         process.exit();
-    }
-});
-
-// ==================================================================
-// 列出项目所包含的页面信息
-gulp.task('listpages', function () {
-    let confPath = './src/' + proName + '/config/data.js';
-    let archiveConfPath = './archive/' + proSn + '-' + proName + '-' + proTitle + '/src/' + proName + '/config/data.js';
-    let confExist = fs.existsSync(confPath);
-    let archiveConfExist = fs.existsSync(archiveConfPath);
-    let realPath;
-    if (confExist) {
-        realPath = confPath;
-    } else if (archiveConfExist) {
-        realPath = archiveConfPath;
-    }
-    let pagesData = require(realPath);
-    console.log('------------------------------------------------------------------');
-    console.log('-- ' + proTitle + ' 项目页面信息');
-    let pagesCount = Object.keys(pagesData.default.pages).length;
-    console.log('-- ' + cTitle('页面总数:: ') + cSuccess(pagesCount));
-    for (let page in pagesData.default.pages) {
-        let pageObj = pagesData.default.pages[page];
-        console.log('------------------------------------------------------------------');
-        console.log('-- Page title:: ' + cInfo(pageObj.title));
-        console.log('-- Page file name:: ' + cInfo(pageObj.action + '.html'));
-        console.log('-- ');
-        console.log('------------------------------------------------------------------');
     }
 });
 
@@ -702,10 +707,47 @@ gulp.task('archive', ['archive:zip']);
 
 // ==================================================================
 // combine all project config to a js file
-gulp.task('comb:conf', function () {
+gulp.task('conf:comb', function () {
     let confStr = JSON.stringify(proList);
     confStr = "export default " + beautify(confStr, {indent_size: 2});
     fs.writeFileSync(combConfPath, confStr);
+});
+
+// ==================================================================
+// print config project param help infomation
+gulp.task('conf:help', function () {
+    let confEg = {};
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + cTitle(cError('必选项：')));
+    console.log('------------------------------------------------------------------');
+    for (let param of confInfoArr) {
+        if (param.must) {
+            console.log('[' + cInfo(param.key) + ']');
+            console.log(cWarn('说明:  ') + param.desc);
+            console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+            console.log(cWarn('eg.    ') + param.eg);
+            console.log('');
+            confEg[param.key] = param.eg;
+        }
+    }
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + cTitle(cWarn('可选项：')));
+    console.log('------------------------------------------------------------------');
+    for (let param of confInfoArr) {
+        if (!param.must) {
+            console.log('[' + cNotice(param.key) + ']');
+            console.log(cWarn('说明:  ') + param.desc);
+            console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+            console.log(cWarn('eg.    ') + param.eg);
+            console.log('');
+            confEg[param.key] = param.eg;
+        }
+    }
+    let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 2});
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + cTitle(cWarn('配置示例：')));
+    console.log('------------------------------------------------------------------');
+    console.log(confEgStr);
 });
 
 // ==================================================================
