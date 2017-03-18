@@ -578,7 +578,7 @@ switch (gulpAction) {
     case 'conf:format':
         console.log('==================================================================');
         console.log('-- 项目配置文件格式化');
-        if (gutil.env.pro != 'all') {
+        if (gutil.env.pro != 'all' && Object.keys(gutil.env).length > 1) {
             checkProParam();
         }
         break;
@@ -849,7 +849,7 @@ gulp.task('conf:help', function () {
 // ==================================================================
 // format the project config
 gulp.task('conf:format', function () {
-    if (gutil.env.pro == 'all') {
+    if (gutil.env.pro == 'all' || Object.keys(gutil.env).length == 1) {
         // format all
         console.log('------------------------------------------------------------------');
         for (let pro of proList.pro) {
