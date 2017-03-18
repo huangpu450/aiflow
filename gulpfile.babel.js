@@ -27,7 +27,6 @@ let cNotice = color.blue;
 let cSuccess = color.green;
 let cInfo = color.cyan;
 let cTitle = color.magenta.bold;
-let cText = color.white;
 import browserS from 'browser-sync';
 let browserSync = browserS.create();
 import nodeUnique from 'node-unique-array';
@@ -84,7 +83,7 @@ let confInfoArr = [
         "default": ''
     }, {
         "key": "dev",
-        "desc": "项目展示的平台类型，可用于决定CSS的编译方式。\n       可选值:: pc/phone",
+        "desc": "项目展示的平台类型，可用于决定CSS的编译方式。\n       可选值:: pc/phone\n       只有当CSS开发过程中，将源码编入：\n         " + cNotice('comm*.css or comm*.less') + "\n         " + cNotice("main*.css or main*.less") + "\n       这种情况下系统会根据该参数判断编译方式。\n       其他情况不需要配置。",
         "eg": "phone",
         "must": true,
         "default": 'pc'
@@ -136,6 +135,12 @@ let confInfoArr = [
         "key": "svn",
         "desc": "项目SVN地址",
         "eg": "http://xx.xxx.x.xx:9999/svn/ui/hn/2017",
+        "must": false,
+        "default": ''
+    }, {
+        "key": "remark",
+        "desc": "项目备注",
+        "eg": "本项目必须支持到IE8浏览器",
         "must": false,
         "default": ''
     }
@@ -267,6 +272,44 @@ function getAllProConf() {
     return proArr.get();
 }
 
+/**
+ * 格式化单个项目配置参数
+ * @param pro
+ * @return {{}}
+ */
+function formatConf(pro) {
+    let tmpPro = {};
+    // 按标准化的内容及顺序格式化配置内容
+    for (let param of confInfoArr) {
+        tmpPro[param.key] = pro[param.key] ? pro[param.key] : param.default;
+    }
+    // 合并非标准化参数
+    Object.assign(tmpPro, pro);
+    return tmpPro;
+}
+
+/**
+ * 格式化所有配置信息列表
+ * @param proList
+ * @return {{}}
+ */
+function formatAllConf(proList) {
+    let combConf = {};
+    combConf.pro = [];
+    for (let pro of proList.pro) {
+        let tmpPro = {};
+        tmpPro = formatConf(pro);
+        // // 按标准化的内容及顺序格式化配置内容
+        // for (let param of confInfoArr) {
+        //     tmpPro[param.key] = pro[param.key] ? pro[param.key] : param.default;
+        // }
+        // // 合并非标准化参数
+        // Object.assign(tmpPro, pro);
+        combConf.pro.push(tmpPro);
+    }
+    return combConf;
+}
+
 // 读取所有配置信息
 proList.pro = getAllProConf();
 
@@ -301,9 +344,9 @@ let proSn = '',
     compileCssType = '',
     minImg = false, // 是否开启图片压缩
     minLevel = 3, // 压缩等级 0-7，值越大越压缩大
-    proConf = '';
+    proConf = {};
 // 项目序列号
-proSn = gutil.env.sn ? gutil.env.sn : '';
+proSn = gutil.env.prosn ? gutil.env.prosn : '';
 // 传入项目名称方式执行任务
 proName = gutil.env.pro ? gutil.env.pro : '';
 
@@ -318,7 +361,7 @@ if (proSn === '') {
             remUnit = pro.remUnit ? pro.remUnit : 75;
             proConf.remUnit = remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
-            proConf.compileCssType = compileCssType;
+            proConf.compileCss = compileCssType;
             minImg = (pro.minImg != undefined) ? pro.minImg : false;
             proConf.minImg = minImg;
             minLevel = (pro.minLevel && pro.minLevel >= 0 && pro.minLevel <= 7) ? pro.minLevel : 3;
@@ -337,7 +380,7 @@ if (proSn === '') {
             remUnit = pro.remUnit ? pro.remUnit : 75;
             proConf.remUnit = remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
-            proConf.compileCssType = compileCssType;
+            proConf.compileCss = compileCssType;
             minImg = (pro.minImg != undefined) ? pro.minImg : false;
             proConf.minImg = minImg;
             minLevel = (pro.minLevel && pro.minLevel >= 0 && pro.minLevel <= 7) ? pro.minLevel : 3;
@@ -532,6 +575,13 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 合并所有项目配置文件为一个');
         break;
+    case 'conf:format':
+        console.log('==================================================================');
+        console.log('-- 项目配置文件格式化');
+        if (gutil.env.pro != 'all') {
+            checkProParam();
+        }
+        break;
     case 'conf:help':
         console.log('==================================================================');
         console.log('-- 项目配置帮助信息');
@@ -618,8 +668,9 @@ gulp.task('search', function () {
                 printProInfo(pro);
                 console.log('-- ' + cTitle('Project configuration detail::'));
                 console.log('------------------------------------------------------------------');
-                console.log(pro);
-                console.log('------------------------------------------------------------------');
+                let proStr = JSON.stringify(pro);
+                proStr = beautify(proStr, {indent_size: 4});
+                console.log(proStr);
                 console.log(' ');
             }
         }
@@ -681,8 +732,9 @@ gulp.task('archive:copy', function () {
 
 // task action:: export configuration
 gulp.task('archive:conf', ['archive:copy'], function () {
+    proConf = formatConf(proConf);
     let confStr = JSON.stringify(proConf);
-    confStr = beautify(confStr, {indent_size: 2});
+    confStr = beautify(confStr, {indent_size: 4});
     fs.writeFileSync(proArchiveDir + '/' + archiveConfFileName, confStr);
 });
 
@@ -708,65 +760,182 @@ gulp.task('archive', ['archive:zip']);
 // ==================================================================
 // combine all project config to a js file
 gulp.task('conf:comb', function () {
-    let confStr = JSON.stringify(proList);
-    confStr = "export default " + beautify(confStr, {indent_size: 2});
+    let combConf = formatAllConf(proList);
+    let confStr = JSON.stringify(combConf);
+    confStr = "'use strict';\nexport default " + beautify(confStr, {indent_size: 4});
     fs.writeFileSync(combConfPath, confStr);
+    console.log('-- 合并后存在位置：');
+    console.log('-- ' + cSuccess(path.resolve(combConfPath)));
+    console.log('');
 });
 
 // ==================================================================
 // print config project param help infomation
 gulp.task('conf:help', function () {
-    let confEg = {};
-    console.log('------------------------------------------------------------------');
-    console.log('-- ' + cTitle(cError('必选项：')));
-    console.log('------------------------------------------------------------------');
-    for (let param of confInfoArr) {
-        if (param.must) {
-            console.log('[' + cInfo(param.key) + ']');
-            console.log(cWarn('说明:  ') + param.desc);
-            console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-            console.log(cWarn('eg.    ') + param.eg);
-            console.log('');
-            confEg[param.key] = param.eg;
+    if (Object.keys(gutil.env).length > 1) {
+        // 查询单独参数说明
+        if (gutil.env.param) {
+            console.log('------------------------------------------------------------------');
+            console.log('-- 查看参数：' + cTitle(cError(gutil.env.param)));
+            console.log('------------------------------------------------------------------');
+            let paramFind = false;
+            for (let param of confInfoArr) {
+                if (gutil.env.param.indexOf(param.key) != -1) {
+                    paramFind = true;
+                    console.log('[' + cInfo(param.key) + ']');
+                    console.log(cWarn('必选:  ') + (param.must ? cSuccess('是') : cError('否')));
+                    console.log(cWarn('说明:  ') + param.desc);
+                    console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+                    console.log(cWarn('eg.    ') + param.eg);
+                    console.log('');
+                }
+            }
+            if (!paramFind) {
+                console.log('-- ' + cError('没有找到该参数，请核实输入！'));
+            }
         }
-    }
-    console.log('------------------------------------------------------------------');
-    console.log('-- ' + cTitle(cWarn('可选项：')));
-    console.log('------------------------------------------------------------------');
-    for (let param of confInfoArr) {
-        if (!param.must) {
-            console.log('[' + cNotice(param.key) + ']');
-            console.log(cWarn('说明:  ') + param.desc);
-            console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-            console.log(cWarn('eg.    ') + param.eg);
-            console.log('');
-            confEg[param.key] = param.eg;
+        // 查看配置DEMO
+        if (gutil.env.eg) {
+            console.log('------------------------------------------------------------------');
+            console.log('-- 查看完整参数配置示例');
+            console.log('------------------------------------------------------------------');
+            let confEg = {};
+            for (let param of confInfoArr) {
+                confEg[param.key] = param.eg;
+            }
+            let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 4});
+            console.log(confEgStr);
         }
+    } else {
+        // 获取所有配置参数说明
+        let confEg = {};
+        // 必须参数
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cTitle(cError('必选项：')));
+        console.log('------------------------------------------------------------------');
+        for (let param of confInfoArr) {
+            if (param.must) {
+                console.log('[' + cInfo(param.key) + ']');
+                console.log(cWarn('说明:  ') + param.desc);
+                console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+                console.log(cWarn('eg.    ') + param.eg);
+                console.log('');
+                confEg[param.key] = param.eg;
+            }
+        }
+        // 可选参数
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cTitle(cWarn('可选项：')));
+        console.log('------------------------------------------------------------------');
+        for (let param of confInfoArr) {
+            if (!param.must) {
+                console.log('[' + cNotice(param.key) + ']');
+                console.log(cWarn('说明:  ') + param.desc);
+                console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+                console.log(cWarn('eg.    ') + param.eg);
+                console.log('');
+                confEg[param.key] = param.eg;
+            }
+        }
+        // 配置示例
+        let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 4});
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cTitle(cWarn('配置示例：')));
+        console.log('------------------------------------------------------------------');
+        console.log(confEgStr);
     }
-    let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 2});
-    console.log('------------------------------------------------------------------');
-    console.log('-- ' + cTitle(cWarn('配置示例：')));
-    console.log('------------------------------------------------------------------');
-    console.log(confEgStr);
+});
+
+// ==================================================================
+// format the project config
+gulp.task('conf:format', function () {
+    if (gutil.env.pro == 'all') {
+        // format all
+        console.log('------------------------------------------------------------------');
+        for (let pro of proList.pro) {
+            pro = formatConf(pro);
+            let confStr = JSON.stringify(pro);
+            confStr = beautify(confStr, {indent_size: 4});
+            let tmpArchiveConfFileName = aiproConfPre + '-' + pro.sn + '-' + pro.name + '-conf.json';
+            let tmpProArchiveDir = archiveDir + '/' + pro.sn + '-' + pro.name + '-' + pro.title;
+            let tmpArchiveConfFilePath = tmpProArchiveDir + '/' + tmpArchiveConfFileName;
+            if (fs.existsSync(tmpArchiveConfFilePath)) {
+                // 如果归档目录中有该项目
+                fs.writeFileSync(tmpArchiveConfFilePath, confStr);
+            }
+            let tmpSrcDir = wwwDir + '/static/' + pro.name + '/src';
+            let tmpDevConfFilePath = logicDir + '/common/config/pro/' + tmpArchiveConfFileName;
+            if (fs.existsSync(tmpSrcDir)) {
+                // 如果该项目存在于开发目录中
+                fs.writeFileSync(tmpDevConfFilePath, confStr);
+            }
+            gutil.log(cInfo(pro.sn + ' ' + pro.title) + ' 配置格式化完成');
+        }
+        console.log('------------------------------------------------------------------');
+        console.log('');
+    } else {
+        // format current
+        proConf = formatConf(proConf);
+        // write config file
+        let confStr = JSON.stringify(proConf);
+        confStr = beautify(confStr, {indent_size: 4});
+        if (fs.existsSync(archiveConfFilePath)) {
+            // 如果归档目录中有该项目
+            fs.writeFileSync(archiveConfFilePath, confStr);
+        }
+        if (fs.existsSync(srcDir)) {
+            // 如果该项目存在于开发目录中
+            fs.writeFileSync(devConfFilePath, confStr);
+        }
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cInfo(proConf.title) + ' 配置格式化完成');
+        console.log('------------------------------------------------------------------');
+        console.log(confStr);
+    }
 });
 
 // ==================================================================
 // config the project
 gulp.task('conf', function () {
+    let configSuc = false;
     for (let param in gutil.env) {
-        if (param != '_' && param != 'pro' && param != 'sn') {
-            proConf[param] = gutil.env[param];
+        // sn, name, title 三个参数不可配置
+        // 值不相同时才可配置
+        if (param != '_' && param != 'pro' && param != 'sn' && !['sn', 'name', 'title'].includes(gutil.env[param]) && proConf[param] != gutil.env[param]) {
+            proConf[param] = gutil.env[param] == 'undefined' ? undefined : gutil.env[param];
+            // 如果配置为 undefined，则删除该属性
+            if (gutil.env[param] == undefined) {
+                console.log('undefined');
+                delete proConf[param];
+            }
+            configSuc = true;
         }
     }
-    let confStr = JSON.stringify(proConf);
-    confStr = beautify(confStr, {indent_size: 2});
-    if (fs.existsSync(archiveConfFilePath)) {
-        // 如果归档目录中有该项目
-        fs.writeFileSync(archiveConfFilePath, confStr);
-    }
-    if (fs.existsSync(srcDir)) {
-        // 如果该项目存在于开发目录中
-        fs.writeFileSync(devConfFilePath, confStr);
+    // 如果配置成功，则更新配置文件
+    if (configSuc) {
+        proConf = formatConf(proConf);
+        let confStr = JSON.stringify(proConf);
+        confStr = beautify(confStr, {indent_size: 4});
+        if (fs.existsSync(archiveConfFilePath)) {
+            // 如果归档目录中有该项目
+            fs.writeFileSync(archiveConfFilePath, confStr);
+        }
+        if (fs.existsSync(srcDir)) {
+            // 如果该项目存在于开发目录中
+            fs.writeFileSync(devConfFilePath, confStr);
+        }
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cInfo(proConf.title) + ' 最新配置值');
+        console.log('------------------------------------------------------------------');
+        console.log(confStr);
+    } else {
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cInfo(proConf.title) + ' 配置失败');
+        console.log('------------------------------------------------------------------');
+        console.log('1. 配置参数及对应值不可缺少，请检查命令，如：--dev pc。');
+        console.log('2. sn, name, title 三个参数不可配置。');
+        console.log('3. 新配置值必须与原值不同。');
+        console.log(cError('请检查当前命令是否输入正确！'));
     }
 });
 
@@ -1395,3 +1564,4 @@ gulp.task('test', function () {
     Object.assign(obj1, obj2);
     console.log(obj1);
 });
+
