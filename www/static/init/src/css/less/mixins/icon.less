@@ -1,0 +1,15 @@
+// icon
+
+.iconfont(@icon, @w, @h, @color: @gray) {
+  color: @color;
+  font-size: min(@w, @h);
+  &:before {
+    content: @icon;
+    display: block;
+    font-size: min(@w, @h);
+    height: @h;
+    line-height: @h;
+    color: @color;
+  }
+}
+

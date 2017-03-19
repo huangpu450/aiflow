@@ -1,0 +1,42 @@
+// grid
+@import "clearfix.less";
+
+// container
+.cont {
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  .clearfix();
+}
+
+// row
+.r {
+  margin: 0;
+  padding: 0;
+  .clearfix();
+}
+
+// column
+// column left
+.c, .c-l {
+  float: left;
+  box-sizing: border-box;
+  min-height: 1px; /*no*/
+}
+
+// column right
+.c-r {
+  float: right;
+  box-sizing: border-box;
+  min-height: 1px; /*no*/
+}
+
+// generate grid
+.grid(@n, @i: 1) when (@i <= @n) {
+  .c-@{n}-@{i} {
+    width: calc(@i / @n * 100%);
+  }
+  .grid(@n, (@i + 1));
+}
+
