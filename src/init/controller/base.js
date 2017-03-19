@@ -26,7 +26,7 @@ export default class extends Common {
         let dataConf = this.config('data.pages');
         let pageData = dataConf[actionName];
 
-        pageData.pageTitle = this.proConf.sn + '-' + pageData.title;
+        pageData.pageTitle = /*this.proConf.sn + '-' + */pageData.title;
         return pageData;
     }
 
