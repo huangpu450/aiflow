@@ -1000,11 +1000,13 @@ let devProcessors_concat_phone = [
 let devProcessors_grace;
 // grace config for pc
 let devProcessors_grace_pc = [
-    cssgrace
+    cssgrace,
+    csscalc
 ];
 // grace config for phone
 let devProcessors_grace_phone = [
     cssgrace,
+    csscalc,
     px2rem({remUnit: remUnit}),
 ];
 
