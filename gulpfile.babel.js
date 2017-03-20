@@ -333,8 +333,6 @@ function formatAllConf(proList) {
  * 设置配置文件
  * @param filePath
  * @param proConf
- * @param param
- * @param val
  */
 function setConfFile(filePath, proConf) {
     let tmpPath = filePath;
