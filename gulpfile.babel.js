@@ -901,7 +901,8 @@ gulp.task('conf', function () {
     for (let param in gutil.env) {
         // 修复配置值的数据类型
         gutil.env[param] = gutil.env[param] == 'undefined' ? undefined : gutil.env[param];
-        gutil.env[param] = gutil.env[param] == 'true';
+        gutil.env[param] = gutil.env[param] == 'true' ? true : gutil.env[param];
+        gutil.env[param] = gutil.env[param] == 'false' ? false : gutil.env[param];
 
         // sn, name, title 三个参数不可配置
         // 值不相同时才可配置
