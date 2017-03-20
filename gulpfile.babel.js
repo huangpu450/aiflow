@@ -329,6 +329,40 @@ function formatAllConf(proList) {
     return combConf;
 }
 
+/**
+ * 设置配置文件
+ * @param filePath
+ * @param proConf
+ * @param param
+ * @param val
+ */
+function setConfFile(filePath, proConf) {
+    let tmpPath = filePath;
+    // 匹配配置内容的正则
+    let confReg = /{[\w\W]*}\s*/gi;
+    // 使用 require 语法时，路径必须带 ./
+    let aiList = require('./' + tmpPath).default;
+    let tmpConf = {};
+    tmpConf.pro = [];
+    let confCon = fs.readFileSync(tmpPath, 'utf-8');
+    let find = false;
+    for (let pro of aiList.pro) {
+        if (pro.name == proConf.name) {
+            find = true;
+            tmpConf.pro.push(formatConf(proConf));
+        } else {
+            tmpConf.pro.push(formatConf(pro));
+        }
+    }
+    if (find) {
+        // 如果找到相应配置参数
+        let tmpConfStr = confCon.replace(confReg, '') + JSON.stringify(tmpConf);
+        tmpConfStr = beautify(tmpConfStr, {indent_size: 4});
+        fs.writeFileSync(tmpPath, tmpConfStr);
+        gutil.log(cInfo(path.resolve(tmpPath)) + ' 配置完成');
+    }
+}
+
 // 读取所有配置信息
 proList.pro = getAllProConf();
 
@@ -993,7 +1027,6 @@ gulp.task('conf', function () {
             proConf[param] = gutil.env[param];
             // 如果配置为 undefined，则删除该属性
             if (gutil.env[param] == undefined) {
-                console.log('undefined');
                 delete proConf[param];
             }
             configSuc = true;
@@ -1012,6 +1045,22 @@ gulp.task('conf', function () {
             // 如果该项目存在于开发目录中
             fs.writeFileSync(devConfFilePath, confStr);
         }
+
+        // 项目初始配置文件设置
+        setConfFile(initConfPath, proConf);
+        // 批量项目配置文件设置
+        // aipro_xxxx.js
+        let tempFiles = fs.readdirSync(aiproConfPath);
+        tempFiles.forEach(function (fileName, k) {
+            // 判断是否为项目配置前缀
+            if (fileName.indexOf(aiproConfPre) == 0) {
+                let tmpPath = path.join(aiproConfPath, fileName);
+                if (fs.statSync(tmpPath).isFile()) {
+                    setConfFile(tmpPath, proConf);
+                }
+            }
+        });
+
         console.log('------------------------------------------------------------------');
         console.log('-- ' + cInfo(proConf.title) + ' 最新配置值');
         console.log('------------------------------------------------------------------');
