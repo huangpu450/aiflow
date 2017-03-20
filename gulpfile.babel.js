@@ -577,6 +577,11 @@ switch (gulpAction) {
             checkProParam();
         }
         break;
+    case 'conf:get':
+        console.log('==================================================================');
+        console.log('-- 项目配置信息查询');
+        checkProParam();
+        break;
     case 'conf:help':
         console.log('==================================================================');
         console.log('-- 项目配置帮助信息');
@@ -913,6 +918,21 @@ gulp.task('conf:format', function () {
         console.log('------------------------------------------------------------------');
         console.log(confStr);
     }
+});
+
+// ==================================================================
+// get the project config info
+gulp.task('conf:get', function () {
+    // format current
+    proConf = formatConf(proConf);
+    // write config file
+    let confStr = JSON.stringify(proConf);
+    confStr = beautify(confStr, {indent_size: 4});
+
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + cInfo(proConf.title) + ' 配置内容');
+    console.log('------------------------------------------------------------------');
+    console.log(confStr);
 });
 
 // ==================================================================
