@@ -55,6 +55,7 @@ const releaseRootDir = rootDir + 'releases';
 const initSrcDir = logicDir + '/init';
 const initViewDir = viewDir + '/init';
 const initWwwDir = wwwDir + '/static/init';
+const initConfPath = logicDir + '/common/config/initpro.js';
 const gulpAction = gutil.env._[0];
 
 // 所有项目信息存储对象
@@ -224,6 +225,7 @@ function getAllProConf() {
             });
 
             // 读取批量项目配置信息
+            // aipro_xxxx.js
             let tempFiles = fs.readdirSync(aiproConfPath);
             tempFiles.forEach(function (fileName, k) {
                 // 判断是否为项目配置前缀
@@ -287,6 +289,28 @@ function formatConf(pro) {
     // 合并非标准化参数
     Object.assign(tmpPro, pro);
     return tmpPro;
+}
+
+/**
+ * 格式化配置文件
+ * @param filePath
+ */
+function formatConfFile(filePath) {
+    let tmpPath = filePath;
+    // 匹配配置内容的正则
+    let confReg = /{[\w\W]*}\s*/gi;
+    // 使用 require 语法时，路径必须带 ./
+    let aiList = require('./' + tmpPath).default;
+    let tmpConf = {};
+    tmpConf.pro = [];
+    let confCon = fs.readFileSync(tmpPath, 'utf-8');
+    for (let pro of aiList.pro) {
+        tmpConf.pro.push(formatConf(pro));
+    }
+    let tmpConfStr = confCon.replace(confReg, '') + JSON.stringify(tmpConf);
+    tmpConfStr = beautify(tmpConfStr, {indent_size: 4});
+    fs.writeFileSync(tmpPath, tmpConfStr);
+    gutil.log(cInfo(path.resolve(tmpPath)) + ' 格式化完成');
 }
 
 /**
@@ -878,6 +902,8 @@ gulp.task('conf:format', function () {
     if (gutil.env.pro == 'all' || Object.keys(gutil.env).length == 1) {
         // format all
         console.log('------------------------------------------------------------------');
+        // 对单独配置文件进行格式化
+        // xxxxx.json
         for (let pro of proList.pro) {
             pro = formatConf(pro);
             let confStr = JSON.stringify(pro);
@@ -897,6 +923,22 @@ gulp.task('conf:format', function () {
             }
             gutil.log(cInfo(pro.sn + ' ' + pro.title) + ' 配置格式化完成');
         }
+
+        // 格式化项目初始配置文件
+        formatConfFile(initConfPath);
+        // 批量项目配置格式化
+        // aipro_xxxx.js
+        let tempFiles = fs.readdirSync(aiproConfPath);
+        tempFiles.forEach(function (fileName, k) {
+            // 判断是否为项目配置前缀
+            if (fileName.indexOf(aiproConfPre) == 0) {
+                let tmpPath = path.join(aiproConfPath, fileName);
+                if (fs.statSync(tmpPath).isFile()) {
+                    formatConfFile(tmpPath);
+                }
+            }
+        });
+
         console.log('------------------------------------------------------------------');
         console.log('');
     } else {
