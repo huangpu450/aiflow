@@ -61,27 +61,27 @@ const gulpAction = gutil.env._[0];
 let proList = {};
 
 // 项目配置信息模板
-let confInfoArr = [
+let confInfoObj = {
     // 必选参数
-    {
+    "sn": {
         "key": "sn",
         "desc": "项目编号，由英文、数字、-、_组合而成，必须唯一。",
         "eg": "2016-HN001",
         "must": true,
         "default": ''
-    }, {
+    }, "name": {
         "key": "name",
         "desc": "项目编码，由英文、数字、下划线组成的字符串，不区分大小写，必须唯一",
         "eg": "guodanian",
         "must": true,
         "default": ''
-    }, {
+    }, "title": {
         "key": "title",
         "desc": "项目标题",
         "eg": "湖南移动-过大年聚合页",
         "must": true,
         "default": ''
-    }, {
+    }, "key": {
         "key": "dev",
         "desc": "项目展示的平台类型，可用于决定CSS的编译方式。\n       可选值:: pc/phone\n       只有当CSS开发过程中，将源码编入：\n         " + cNotice('comm*.css or comm*.less') + "\n         " + cNotice("main*.css or main*.less") + "\n       这种情况下系统会根据该参数判断编译方式。\n       其他情况不需要配置。",
         "eg": "phone",
@@ -89,62 +89,62 @@ let confInfoArr = [
         "default": 'pc'
     },
     // 可选配置
-    {
+    "author": {
         "key": "author",
         "desc": "项目作者，及相关的开发人员",
         "eg": "张三，李四",
         "must": false,
         "default": ''
-    }, {
+    }, "type": {
         "key": "type",
         "desc": "项目类型，指定项目属于哪种类型，会在哪种场景下展示。\n       可选值:: web/wap/all",
         "eg": "web",
         "must": false,
         "default": ''
-    }, {
+    }, "date": {
         "key": "date",
         "desc": "项目创建日期",
         "eg": "2016-12-10",
         "must": false,
         "default": ''
-    }, {
+    }, "remUnit": {
         "key": "remUnit",
         "desc": "REM单位换算单元值，即设计稿的宽度除以10。如设计稿宽750，则值为75。",
         "eg": "75",
         "must": false,
         "default": '75'
-    }, {
+    }, "compileCss": {
         "key": "compileCss",
         "desc": "CSS编译方式，指定CSS是以某种方式开发的。\n       可选值：less, css，推荐less方式开发。",
         "eg": "less",
         "must": false,
         "default": 'css'
-    }, {
+    }, "minImg": {
         "key": "minImg",
         "desc": "是否启用图片压缩，配置值：true（开启）， false（关闭）",
         "eg": "false",
         "must": false,
         "default": false
-    }, {
+    }, "minLevel": {
         "key": "minLevel",
         "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。\n       智能判断可压缩的空间，存在最大只能压缩到一定程序，\n       参数值增加不会产生效果。",
         "eg": "3",
         "must": false,
         "default": 3
-    }, {
+    }, "svn": {
         "key": "svn",
         "desc": "项目SVN地址",
         "eg": "http://xx.xxx.x.xx:9999/svn/ui/hn/2017",
         "must": false,
         "default": ''
-    }, {
+    }, "remark": {
         "key": "remark",
         "desc": "项目备注",
         "eg": "本项目必须支持到IE8浏览器",
         "must": false,
         "default": ''
     }
-];
+};
 
 /**
  * 以某元素为索引数组去重，如果出现重复则合并
@@ -280,7 +280,8 @@ function getAllProConf() {
 function formatConf(pro) {
     let tmpPro = {};
     // 按标准化的内容及顺序格式化配置内容
-    for (let param of confInfoArr) {
+    for (let paramKey in confInfoObj) {
+        let param = confInfoObj[paramKey];
         tmpPro[param.key] = pro[param.key] ? pro[param.key] : param.default;
     }
     // 合并非标准化参数
@@ -773,16 +774,15 @@ gulp.task('conf:help', function () {
             console.log('-- 查看参数：' + cTitle(cError(gutil.env.param)));
             console.log('------------------------------------------------------------------');
             let paramFind = false;
-            for (let param of confInfoArr) {
-                if (gutil.env.param.indexOf(param.key) != -1) {
-                    paramFind = true;
-                    console.log('[' + cInfo(param.key) + ']');
-                    console.log(cWarn('必选:  ') + (param.must ? cSuccess('是') : cError('否')));
-                    console.log(cWarn('说明:  ') + param.desc);
-                    console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-                    console.log(cWarn('eg.    ') + param.eg);
-                    console.log('');
-                }
+            if (confInfoObj[gutil.env.param] != undefined) {
+                let param = confInfoObj[gutil.env.param];
+                paramFind = true;
+                console.log('[' + cInfo(param.key) + ']');
+                console.log(cWarn('必选:  ') + (param.must ? cSuccess('是') : cError('否')));
+                console.log(cWarn('说明:  ') + param.desc);
+                console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+                console.log(cWarn('eg.    ') + param.eg);
+                console.log('');
             }
             if (!paramFind) {
                 console.log('-- ' + cError('没有找到该参数，请核实输入！'));
@@ -794,8 +794,8 @@ gulp.task('conf:help', function () {
             console.log('-- 查看完整参数配置示例');
             console.log('------------------------------------------------------------------');
             let confEg = {};
-            for (let param of confInfoArr) {
-                confEg[param.key] = param.eg;
+            for (let param in confInfoObj) {
+                confEg[param] = confInfoObj[param].eg;
             }
             let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 4});
             console.log(confEgStr);
@@ -808,7 +808,8 @@ gulp.task('conf:help', function () {
             console.log('------------------------------------------------------------------');
             console.log('-- ' + cTitle(cError('必选项：')));
             console.log('------------------------------------------------------------------');
-            for (let param of confInfoArr) {
+            for (let paramKey in confInfoObj) {
+                let param = confInfoObj[paramKey];
                 if (param.must) {
                     console.log('[' + cInfo(param.key) + ']');
                     console.log(cWarn('说明:  ') + param.desc);
@@ -831,7 +832,8 @@ gulp.task('conf:help', function () {
         console.log('------------------------------------------------------------------');
         console.log('-- ' + cTitle(cError('必选项：')));
         console.log('------------------------------------------------------------------');
-        for (let param of confInfoArr) {
+        for (let paramKey in confInfoObj) {
+            let param = confInfoObj[paramKey];
             if (param.must) {
                 console.log('[' + cInfo(param.key) + ']');
                 console.log(cWarn('说明:  ') + param.desc);
@@ -845,7 +847,8 @@ gulp.task('conf:help', function () {
         console.log('------------------------------------------------------------------');
         console.log('-- ' + cTitle(cWarn('可选项：')));
         console.log('------------------------------------------------------------------');
-        for (let param of confInfoArr) {
+        for (let paramKey in confInfoObj) {
+            let param = confInfoObj[paramKey];
             if (!param.must) {
                 console.log('[' + cNotice(param.key) + ']');
                 console.log(cWarn('说明:  ') + param.desc);
