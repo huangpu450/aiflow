@@ -299,12 +299,6 @@ function formatAllConf(proList) {
     for (let pro of proList.pro) {
         let tmpPro = {};
         tmpPro = formatConf(pro);
-        // // 按标准化的内容及顺序格式化配置内容
-        // for (let param of confInfoArr) {
-        //     tmpPro[param.key] = pro[param.key] ? pro[param.key] : param.default;
-        // }
-        // // 合并非标准化参数
-        // Object.assign(tmpPro, pro);
         combConf.pro.push(tmpPro);
     }
     return combConf;
