@@ -806,6 +806,30 @@ gulp.task('conf:help', function () {
             let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 4});
             console.log(confEgStr);
         }
+        // 查看必选参数
+        if (gutil.env.must) {
+            // 获取所有配置参数说明
+            let confEg = {};
+            // 必须参数
+            console.log('------------------------------------------------------------------');
+            console.log('-- ' + cTitle(cError('必选项：')));
+            console.log('------------------------------------------------------------------');
+            for (let param of confInfoArr) {
+                if (param.must) {
+                    console.log('[' + cInfo(param.key) + ']');
+                    console.log(cWarn('说明:  ') + param.desc);
+                    console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+                    console.log(cWarn('eg.    ') + param.eg);
+                    console.log('');
+                    confEg[param.key] = param.eg;
+                }
+            }
+            let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 4});
+            console.log('------------------------------------------------------------------');
+            console.log('-- ' + cTitle(cWarn('最小配置示例：')));
+            console.log('------------------------------------------------------------------');
+            console.log(confEgStr);
+        }
     } else {
         // 获取所有配置参数说明
         let confEg = {};
