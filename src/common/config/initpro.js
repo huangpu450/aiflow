@@ -47,7 +47,7 @@ export default {
         "remUnit": 75,
         "compileCss": "less",
         "minImg": false,
-        "minLevel": 5,
+        "minLevel": "3",
         "svn": "",
         "remark": ""
     }]
