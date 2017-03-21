@@ -1081,6 +1081,49 @@ gulp.task('conf:get', function () {
     console.log(confStr);
 });
 
+/**
+ * 更新配置文件
+ */
+function updateConfFile(pro) {
+    let proConf = formatConf(pro);
+    let confStr = JSON.stringify(proConf);
+    confStr = beautify(confStr, {indent_size: 4});
+
+    let tmpSrcDir = wwwDir + '/static/' + proConf.name + '/src';
+    let tmpProArchiveDir = archiveDir + '/' + proConf.sn + '-' + proConf.name + '-' + proConf.title;
+    let tmpArchiveConfFileName = aiproConfPre + '-' + proConf.sn + '-' + proConf.name + '-conf.json';
+    let tmpArchiveConfFilePath = tmpProArchiveDir + '/' + tmpArchiveConfFileName;
+    let tmpDevConfFilePath = logicDir + '/common/config/pro/' + tmpArchiveConfFileName;
+
+    if (fs.existsSync(tmpArchiveConfFilePath)) {
+        // 如果归档目录中有该项目
+        fs.writeFileSync(tmpArchiveConfFilePath, confStr);
+    }
+    if (fs.existsSync(tmpSrcDir)) {
+        // 如果该项目存在于开发目录中
+        fs.writeFileSync(tmpDevConfFilePath, confStr);
+    }
+
+    // 项目初始配置文件设置
+    setConfFile(initConfPath, proConf);
+    // 批量项目配置文件设置
+    // aipro_xxxx.js
+    let tempFiles = fs.readdirSync(aiproConfPath);
+    tempFiles.forEach(function (fileName, k) {
+        // 判断是否为项目配置前缀
+        if (fileName.indexOf(aiproConfPre) == 0) {
+            let tmpPath = path.join(aiproConfPath, fileName);
+            if (fs.statSync(tmpPath).isFile()) {
+                setConfFile(tmpPath, proConf);
+            }
+        }
+    });
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + cInfo(pro.title) + ' 最新配置值');
+    console.log('------------------------------------------------------------------');
+    console.log(confStr);
+}
+
 // ==================================================================
 // config the project
 gulp.task('conf', function () {
@@ -1104,37 +1147,38 @@ gulp.task('conf', function () {
     }
     // 如果配置成功，则更新配置文件
     if (configSuc) {
-        proConf = formatConf(proConf);
-        let confStr = JSON.stringify(proConf);
-        confStr = beautify(confStr, {indent_size: 4});
-        if (fs.existsSync(archiveConfFilePath)) {
-            // 如果归档目录中有该项目
-            fs.writeFileSync(archiveConfFilePath, confStr);
-        }
-        if (fs.existsSync(srcDir)) {
-            // 如果该项目存在于开发目录中
-            fs.writeFileSync(devConfFilePath, confStr);
-        }
+        updateConfFile(proConf);
+        // proConf = formatConf(proConf);
+        // let confStr = JSON.stringify(proConf);
+        // confStr = beautify(confStr, {indent_size: 4});
+        // if (fs.existsSync(archiveConfFilePath)) {
+        //     // 如果归档目录中有该项目
+        //     fs.writeFileSync(archiveConfFilePath, confStr);
+        // }
+        // if (fs.existsSync(srcDir)) {
+        //     // 如果该项目存在于开发目录中
+        //     fs.writeFileSync(devConfFilePath, confStr);
+        // }
+        //
+        // // 项目初始配置文件设置
+        // setConfFile(initConfPath, proConf);
+        // // 批量项目配置文件设置
+        // // aipro_xxxx.js
+        // let tempFiles = fs.readdirSync(aiproConfPath);
+        // tempFiles.forEach(function (fileName, k) {
+        //     // 判断是否为项目配置前缀
+        //     if (fileName.indexOf(aiproConfPre) == 0) {
+        //         let tmpPath = path.join(aiproConfPath, fileName);
+        //         if (fs.statSync(tmpPath).isFile()) {
+        //             setConfFile(tmpPath, proConf);
+        //         }
+        //     }
+        // });
 
-        // 项目初始配置文件设置
-        setConfFile(initConfPath, proConf);
-        // 批量项目配置文件设置
-        // aipro_xxxx.js
-        let tempFiles = fs.readdirSync(aiproConfPath);
-        tempFiles.forEach(function (fileName, k) {
-            // 判断是否为项目配置前缀
-            if (fileName.indexOf(aiproConfPre) == 0) {
-                let tmpPath = path.join(aiproConfPath, fileName);
-                if (fs.statSync(tmpPath).isFile()) {
-                    setConfFile(tmpPath, proConf);
-                }
-            }
-        });
-
-        console.log('------------------------------------------------------------------');
-        console.log('-- ' + cInfo(proConf.title) + ' 最新配置值');
-        console.log('------------------------------------------------------------------');
-        console.log(confStr);
+        // console.log('------------------------------------------------------------------');
+        // console.log('-- ' + cInfo(proConf.title) + ' 最新配置值');
+        // console.log('------------------------------------------------------------------');
+        // console.log(confStr);
     } else {
         console.log('------------------------------------------------------------------');
         console.log('-- ' + cInfo(proConf.title) + ' 配置失败');
@@ -1937,7 +1981,10 @@ function askSearchKw() {
  */
 function confProBySearch(kw) {
     let searchKey = ((typeof kw == "string" && kw) ? kw : '');
-    let proChoicesArr = [];
+    let proChoicesArr = [{
+        name: '手动查找项目',
+        value: confProBySearchTag
+    }];
     let findRs = false;
     if (searchKey != '') {
         for (let pro of proList.pro) {
@@ -1969,16 +2016,30 @@ function confProBySearch(kw) {
             }, function (res) {
                 if (res.pro == confProBySearchTag) {
                     // ask the search keyword
+                    askSearchKw();
                 } else {
                     // select config item
+                    let curPro;
+                    for (let pro of proList.pro) {
+                        if (pro.name == res.pro) {
+                            curPro = pro;
+                            break;
+                        }
+                    }
+                    selectConfItem(curPro);
                 }
             })
         );
     } else {
-        console.error('Err:: 你输入的关键词没有匹配到任何相关的项目！')
+        console.warn('  Warn:: 你输入的关键词没有匹配到任何相关的项目！\n         请重新输入！');
+        askSearchKw();
     }
 }
 
+/**
+ * 选择需要配置的参数
+ * @param pro
+ */
 function selectConfItem(pro) {
     let itemChoicesArr = [];
     for (let param in confInfoObj) {
@@ -1996,6 +2057,37 @@ function selectConfItem(pro) {
             message: '请选择需要配置的参数：',
             choices: itemChoicesArr
         }, function (res) {
+            setItemValue(pro, res.item);
+        })
+    );
+}
+
+/**
+ * 配置文件写入
+ * @param pro
+ * @param item
+ */
+function setItemValue(pro, item) {
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'input',
+            name: 'value',
+            message: '新值：'
+        }, function (res) {
+            // 修复配置值的数据类型
+            res.value = res.value == 'undefined' ? undefined : res.value;
+            res.value = res.value == 'true' ? true : res.value;
+            res.value = res.value == 'false' ? false : res.value;
+
+            if (pro[item] != res.value) {
+                pro[item] = res.value;
+                // 如果配置为 undefined，则删除该属性
+                if (res.value == undefined) {
+                    delete pro[item];
+                }
+
+                updateConfFile(pro);
+            }
         })
     );
 }
