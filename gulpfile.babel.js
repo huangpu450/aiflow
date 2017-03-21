@@ -19,6 +19,8 @@ import zip from 'gulp-zip';
 import decompress from 'gulp-decompress';
 import gutil from 'gulp-util';
 import moment from 'moment';
+import console from 'better-console';
+import prompt from 'gulp-prompt';
 import color from 'colors-cli/safe';
 // display message in different color
 let cError = color.red.bold;
@@ -61,6 +63,34 @@ const gulpAction = gutil.env._[0];
 // 所有项目信息存储对象
 let proList = {};
 
+// 项目任务帮助信息
+let taskInfoObj = {
+    "init": {
+        "name": "init",
+        "param": {
+            "pro": {
+                "name": "pro",
+                "desc": "项目名称，用于唯一标识项目的字符串",
+                "must": true,
+                "eg": "guodanian"
+            },
+            "sn": {
+                "name": "sn",
+                "desc": "项目编号，用于唯一标识项目",
+                "must": true,
+                "eg": "2016-HN026"
+            }
+        },
+        "eg": [{
+            "cmd": "gulp init --pro guodanian",
+            "desc": "初始化一个叫 guodanian 的项目"
+        }, {
+            "cmd": "gulp init --sn 2016-HN026",
+            "desc": "初始化一个以 2016-HN026 为编号的项目"
+        }]
+    }
+};
+
 // 项目配置信息模板
 let confInfoObj = {
     // 必选参数
@@ -70,19 +100,22 @@ let confInfoObj = {
         "eg": "2016-HN001",
         "must": true,
         "default": ''
-    }, "name": {
+    },
+    "name": {
         "key": "name",
         "desc": "项目编码，由英文、数字、下划线组成的字符串，不区分大小写，必须唯一",
         "eg": "guodanian",
         "must": true,
         "default": ''
-    }, "title": {
+    },
+    "title": {
         "key": "title",
         "desc": "项目标题",
         "eg": "湖南移动-过大年聚合页",
         "must": true,
         "default": ''
-    }, "key": {
+    },
+    "dev": {
         "key": "dev",
         "desc": "项目展示的平台类型，可用于决定CSS的编译方式。\n       可选值:: pc/phone\n       只有当CSS开发过程中，将源码编入：\n         " + cNotice('comm*.css or comm*.less') + "\n         " + cNotice("main*.css or main*.less") + "\n       这种情况下系统会根据该参数判断编译方式。\n       其他情况不需要配置。",
         "eg": "phone",
@@ -96,49 +129,57 @@ let confInfoObj = {
         "eg": "张三，李四",
         "must": false,
         "default": ''
-    }, "type": {
+    },
+    "type": {
         "key": "type",
         "desc": "项目类型，指定项目属于哪种类型，会在哪种场景下展示。\n       可选值:: web/wap/all",
         "eg": "web",
         "must": false,
         "default": ''
-    }, "date": {
+    },
+    "date": {
         "key": "date",
         "desc": "项目创建日期",
         "eg": "2016-12-10",
         "must": false,
         "default": ''
-    }, "remUnit": {
+    },
+    "remUnit": {
         "key": "remUnit",
         "desc": "REM单位换算单元值，即设计稿的宽度除以10。如设计稿宽750，则值为75。",
         "eg": "75",
         "must": false,
         "default": '75'
-    }, "compileCss": {
+    },
+    "compileCss": {
         "key": "compileCss",
         "desc": "CSS编译方式，指定CSS是以某种方式开发的。\n       可选值：less, css，推荐less方式开发。",
         "eg": "less",
         "must": false,
         "default": 'css'
-    }, "minImg": {
+    },
+    "minImg": {
         "key": "minImg",
         "desc": "是否启用图片压缩，配置值：true（开启）， false（关闭）",
         "eg": "false",
         "must": false,
         "default": false
-    }, "minLevel": {
+    },
+    "minLevel": {
         "key": "minLevel",
         "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。\n       智能判断可压缩的空间，存在最大只能压缩到一定程序，\n       参数值增加不会产生效果。",
         "eg": "3",
         "must": false,
         "default": 3
-    }, "svn": {
+    },
+    "svn": {
         "key": "svn",
         "desc": "项目SVN地址",
         "eg": "http://xx.xxx.x.xx:9999/svn/ui/hn/2017",
         "must": false,
         "default": ''
-    }, "remark": {
+    },
+    "remark": {
         "key": "remark",
         "desc": "项目备注",
         "eg": "本项目必须支持到IE8浏览器",
@@ -331,8 +372,8 @@ function formatAllConf(proList) {
 
 /**
  * 设置配置文件
- * @param filePath
- * @param proConf
+ * @param filePath 配置文件路径
+ * @param proConf 配置内容对象
  */
 function setConfFile(filePath, proConf) {
     let tmpPath = filePath;
@@ -618,6 +659,16 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 项目列表');
         break;
+    case 'list:pages':
+        console.log('==================================================================');
+        console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
+        checkProParam();
+        printProHead();
+        break;
+    case 'search':
+        console.log('==================================================================');
+        console.log('-- 搜索项目');
+        break;
     case 'clear:cache':
         console.log('==================================================================');
         console.log('-- 清除图片压缩处理缓存');
@@ -646,16 +697,6 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 配置项目参数:: ' + cTitle(proName));
         checkProParam();
-        break;
-    case 'list:pages':
-        console.log('==================================================================');
-        console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
-        checkProParam();
-        printProHead();
-        break;
-    case 'search':
-        console.log('==================================================================');
-        console.log('-- 搜索项目');
         break;
     case 'update':
         console.log('==================================================================');
@@ -1021,7 +1062,7 @@ gulp.task('conf', function () {
 
         // sn, name, title 三个参数不可配置
         // 值不相同时才可配置
-        if (param != '_' && param != 'pro' && param != 'sn' && !['sn', 'name', 'title'].includes(gutil.env[param]) && proConf[param] != gutil.env[param]) {
+        if (param != '_' && param != 'pro' && param != 'sn' && !['sn', 'name', 'title'].includes(param) && proConf[param] != gutil.env[param]) {
             proConf[param] = gutil.env[param];
             // 如果配置为 undefined，则删除该属性
             if (gutil.env[param] == undefined) {
@@ -1695,7 +1736,9 @@ gulp.task('test', function () {
     // console.log(t);
     // console.log(moment().format('YYYYMMDDHHmmss'))
     gutil.log('stuff happened', 'Really it did', gutil.colors.magenta('123'));
+    console.info('test dir');
     console.log(gutil.env);
+    console.clear();
     let obj1 = {foo: 123};
     let obj2 = {foo: 321, bar: false};
     Object.assign(obj1, obj2);
