@@ -774,16 +774,19 @@ gulp.task('list:pages', function () {
 // ==================================================================
 // 列出以关键词搜索到的项目信息
 gulp.task('search', function () {
-    let searchKey = ((typeof gutil.env.key == "string" && gutil.env.key) ? gutil.env.key : '');
+    let searchKey = (gutil.env.key ? gutil.env.key : '');
+    searchKey = searchKey == 'true' ? true : searchKey;
+    searchKey = searchKey == 'false' ? false : searchKey;
+
     console.log('-- 搜索关键词为:: ' + cWarn(searchKey));
     console.log(' ');
     let findRs = false;
-    if (searchKey != '') {
+    if (searchKey !== '') {
         for (let pro of proList.pro) {
             let find = false;
             for (let p in confInfoObj) {
                 let tmpV = pro[p];
-                if (typeof tmpV == "string" && tmpV.indexOf(searchKey) >= 0) {
+                if ((typeof tmpV == "string" && tmpV.indexOf(searchKey) >= 0) || (searchKey == tmpV)) {
                     find = true;
                     findRs = true;
                     break;
@@ -1980,18 +1983,21 @@ function askSearchKw() {
  * @param kw
  */
 function confProBySearch(kw) {
-    let searchKey = ((typeof kw == "string" && kw) ? kw : '');
+    let searchKey = (kw ? kw : '');
+    searchKey = (searchKey == "true" ? true : searchKey);
+    searchKey = (searchKey == "false" ? false : searchKey);
+
     let proChoicesArr = [{
         name: '手动查找项目',
         value: confProBySearchTag
     }];
     let findRs = false;
-    if (searchKey != '') {
+    if (searchKey !== '') {
         for (let pro of proList.pro) {
             let find = false;
             for (let p in confInfoObj) {
                 let tmpV = pro[p];
-                if (typeof tmpV == "string" && tmpV.indexOf(searchKey) >= 0) {
+                if ((typeof tmpV == "string" && tmpV.indexOf(searchKey) >= 0) || tmpV == searchKey) {
                     find = true;
                     findRs = true;
                     break;
@@ -2087,6 +2093,8 @@ function setItemValue(pro, item) {
                 }
 
                 updateConfFile(pro);
+            } else {
+                console.warn("Warn:: 值未发生改变，配置结束！");
             }
         })
     );
