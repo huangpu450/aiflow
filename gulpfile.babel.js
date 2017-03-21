@@ -563,6 +563,7 @@ function printProInfo(proInfo) {
     console.log('Project title:: ' + cInfo(proInfo.title));
     console.log('Project SN:: ' + cInfo(proInfo.sn));
     console.log('Project Name:: ' + cInfo(proInfo.name));
+    console.log('Project Author:: ' + cInfo(proInfo.author));
     console.log('Surport Device Type:: ' + cInfo(proInfo.dev));
     console.log('------------------------------------------------------------------');
 }
