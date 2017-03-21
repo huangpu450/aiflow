@@ -9,7 +9,7 @@
     "remUnit": 20,
     "compileCss": "css",
     "minImg": false,
-    "minLevel": 3,
+    "minLevel": 5,
     "svn": "",
     "remark": ""
 }

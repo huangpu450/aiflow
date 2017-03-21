@@ -33,7 +33,7 @@ export default {
         "remUnit": 20,
         "compileCss": "css",
         "minImg": false,
-        "minLevel": 3,
+        "minLevel": 5,
         "svn": "",
         "remark": ""
     }, {
@@ -42,7 +42,7 @@ export default {
         "title": "湖南移动-过大年聚合页",
         "dev": "pc",
         "author": "liyz,susj",
-        "type": "web",
+        "type": "web&wap",
         "date": "2016-11-30",
         "remUnit": 75,
         "compileCss": "less",
