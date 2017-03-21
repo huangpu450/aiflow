@@ -760,12 +760,22 @@ gulp.task('list:pages', function () {
 // ==================================================================
 // 列出以关键词搜索到的项目信息
 gulp.task('search', function () {
-    let searchKey = gutil.env.key ? gutil.env.key : '';
+    let searchKey = ((typeof gutil.env.key == "string" && gutil.env.key) ? gutil.env.key : '');
     console.log('-- 搜索关键词为:: ' + cWarn(searchKey));
     console.log(' ');
+    let findRs = false;
     if (searchKey != '') {
         for (let pro of proList.pro) {
-            if (pro.title.indexOf(searchKey) >= 0 || pro.sn.indexOf(searchKey) >= 0 || pro.name.indexOf(searchKey) >= 0) {
+            let find = false;
+            for (let p in confInfoObj) {
+                let tmpV = pro[p];
+                if (typeof tmpV == "string" && tmpV.indexOf(searchKey) >= 0) {
+                    find = true;
+                    findRs = true;
+                    break;
+                }
+            }
+            if (find) {
                 printProInfo(pro);
                 console.log('-- ' + cTitle('Project configuration detail::'));
                 console.log('------------------------------------------------------------------');
@@ -774,6 +784,9 @@ gulp.task('search', function () {
                 console.log(proStr);
                 console.log(' ');
             }
+        }
+        if (!findRs) {
+            console.log('WARN:: ' + cWarn("未找到相关内容！"));
         }
     } else {
         console.log('ERR:: ' + cError('The search keywords is empty, please check!'));
