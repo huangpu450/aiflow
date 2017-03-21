@@ -59,6 +59,7 @@ const initViewDir = viewDir + '/init';
 const initWwwDir = wwwDir + '/static/init';
 const initConfPath = logicDir + '/common/config/initpro.js';
 const gulpAction = gutil.env._[0];
+const confProBySearchTag = 'setBySearchPro';
 
 // 所有项目信息存储对象
 let proList = {};
@@ -219,6 +220,20 @@ Array.prototype.unique = function (key) {
         }
     }
     return n;
+}
+
+/**
+ * 设置项目配置对象
+ * @param pro
+ * @return {{}}
+ */
+function setProConf(pro) {
+    let proConf = pro;
+    proConf.remUnit = pro.remUnit ? pro.remUnit : 75;
+    proConf.compileCss = pro.compileCss ? pro.compileCss : 'css';
+    proConf.minImg = (pro.minImg != undefined) ? pro.minImg : false;
+    proConf.minLevel = (pro.minLevel && pro.minLevel >= 0 && pro.minLevel <= 7) ? pro.minLevel : 3;
+    return proConf;
 }
 
 /**
@@ -446,18 +461,15 @@ proName = gutil.env.pro ? gutil.env.pro : '';
 if (proSn === '') {
     for (let pro of proList.pro) {
         if (pro.name === proName) {
-            proConf = pro;
             proSn = pro.sn;
             proTitle = pro.title;
             deviceType = pro.dev;
             remUnit = pro.remUnit ? pro.remUnit : 75;
-            proConf.remUnit = remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
-            proConf.compileCss = compileCssType;
             minImg = (pro.minImg != undefined) ? pro.minImg : false;
-            proConf.minImg = minImg;
             minLevel = (pro.minLevel && pro.minLevel >= 0 && pro.minLevel <= 7) ? pro.minLevel : 3;
-            proConf.minLevel = minLevel;
+
+            proConf = setProConf(pro);
             break;
         }
     }
@@ -465,18 +477,15 @@ if (proSn === '') {
     // 传入项目序列号方式执行任务
     for (let pro of proList.pro) {
         if (pro.sn === proSn) {
-            proConf = pro;
             proName = pro.name;
             proTitle = pro.title;
             deviceType = pro.dev;
             remUnit = pro.remUnit ? pro.remUnit : 75;
-            proConf.remUnit = remUnit;
             compileCssType = pro.compileCss ? pro.compileCss : 'css';
-            proConf.compileCss = compileCssType;
             minImg = (pro.minImg != undefined) ? pro.minImg : false;
-            proConf.minImg = minImg;
             minLevel = (pro.minLevel && pro.minLevel >= 0 && pro.minLevel <= 7) ? pro.minLevel : 3;
-            proConf.minLevel = minLevel;
+
+            proConf = setProConf(pro);
             break;
         }
     }
@@ -702,6 +711,10 @@ switch (gulpAction) {
     case 'h':
         console.log('==================================================================');
         console.log('-- 系统帮助');
+        break;
+    case 'c':
+        console.log('==================================================================');
+        console.log('-- 项目配置');
         break;
     case 'update':
         console.log('==================================================================');
@@ -1877,7 +1890,7 @@ function helpConfCustom() {
 }
 
 // ==================================================================
-// globle help info
+// global help info
 gulp.task('h', function () {
     gulp.src('gulpfile.babel.js').pipe(
         prompt.prompt({
@@ -1898,6 +1911,128 @@ gulp.task('h', function () {
                 case 'config':
                     helpConf();
                     break;
+            }
+        })
+    );
+});
+
+/**
+ * 询问搜索关键词
+ */
+function askSearchKw() {
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'input',
+            name: 'kw',
+            message: '请输入你查找的关键词：'
+        }, function (res) {
+            confProBySearch(res.kw);
+        })
+    );
+}
+
+/**
+ * 筛选需要配置的项目
+ * @param kw
+ */
+function confProBySearch(kw) {
+    let searchKey = ((typeof kw == "string" && kw) ? kw : '');
+    let proChoicesArr = [];
+    let findRs = false;
+    if (searchKey != '') {
+        for (let pro of proList.pro) {
+            let find = false;
+            for (let p in confInfoObj) {
+                let tmpV = pro[p];
+                if (typeof tmpV == "string" && tmpV.indexOf(searchKey) >= 0) {
+                    find = true;
+                    findRs = true;
+                    break;
+                }
+            }
+
+            if (find) {
+                proChoicesArr.push({
+                    name: pro.sn + ' ' + pro.title + ' ' + pro.name,
+                    value: pro.name
+                });
+            }
+        }
+    }
+    if (findRs) {
+        gulp.src('gulpfile.babel.js').pipe(
+            prompt.prompt({
+                type: 'list',
+                name: 'pro',
+                message: '请选择需要配置的项目：',
+                choices: proChoicesArr
+            }, function (res) {
+                if (res.pro == confProBySearchTag) {
+                    // ask the search keyword
+                } else {
+                    // select config item
+                }
+            })
+        );
+    } else {
+        console.error('Err:: 你输入的关键词没有匹配到任何相关的项目！')
+    }
+}
+
+function selectConfItem(pro) {
+    let itemChoicesArr = [];
+    for (let param in confInfoObj) {
+        if (param != 'sn' && param != 'name' && param != 'title') {
+            itemChoicesArr.push({
+                name: param + ':: (' + pro[param] + ')',
+                value: param
+            });
+        }
+    }
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'list',
+            name: 'item',
+            message: '请选择需要配置的参数：',
+            choices: itemChoicesArr
+        }, function (res) {
+        })
+    );
+}
+
+// ==================================================================
+// global config task
+gulp.task('c', function () {
+    let proChoicesArr = [{
+        name: '手动查找项目',
+        value: confProBySearchTag
+    }];
+    for (let pro of proList.pro) {
+        proChoicesArr.push({
+            name: pro.sn + ' ' + pro.title + ' ' + pro.name,
+            value: pro.name
+        });
+    }
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'list',
+            name: 'pro',
+            message: '请选择需要配置的项目：',
+            choices: proChoicesArr
+        }, function (res) {
+            if (res.pro == confProBySearchTag) {
+                // ask the search keyword
+                askSearchKw();
+            } else {
+                // select config item
+                let curPro;
+                for (let pro of proList.pro) {
+                    if (pro.name == res.pro) {
+                        curPro = pro;
+                        break;
+                    }
+                }
+                selectConfItem(curPro);
             }
         })
     );
