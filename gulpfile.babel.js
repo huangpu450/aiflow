@@ -698,6 +698,10 @@ switch (gulpAction) {
         console.log('-- 配置项目参数:: ' + cTitle(proName));
         checkProParam();
         break;
+    case 'h':
+        console.log('==================================================================');
+        console.log('-- 系统帮助');
+        break;
     case 'update':
         console.log('==================================================================');
         console.log('-- 软件升级');
@@ -1719,6 +1723,170 @@ gulp.task('update', function () {
         console.log('-- ' + cWarn('当前版本已是最新，无需升级！'));
     }
     console.log('------------------------------------------------------------------');
+});
+
+/**
+ * 打印参数帮助说明
+ * @param paramList
+ */
+function printConfParamHelp(paramList) {
+    for (let p of paramList) {
+        let param = confInfoObj[p];
+        console.log('[' + cInfo(param.key) + ']');
+        console.log(cWarn('必选:  ') + (param.must ? cError('是') : cSuccess('否')));
+        console.log(cWarn('说明:  ') + param.desc);
+        console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+        console.log(cWarn('eg.    ') + param.eg);
+        console.log('');
+    }
+}
+
+/**
+ * 打印(非)必选参数说明
+ * @param isMust
+ */
+function printConfParamIsMust(isMust) {
+    if (isMust) {
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cTitle(cError('必选项：')));
+        console.log('------------------------------------------------------------------');
+    } else {
+        console.log('------------------------------------------------------------------');
+        console.log('-- ' + cTitle(cWarn('可选项：')));
+        console.log('------------------------------------------------------------------');
+    }
+    for (let p in confInfoObj) {
+        let param = confInfoObj[p];
+        if (param.must == isMust) {
+            console.log('[' + cInfo(param.key) + ']');
+            console.log(cWarn('必选:  ') + (param.must ? cError('是') : cSuccess('否')));
+            console.log(cWarn('说明:  ') + param.desc);
+            console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
+            console.log(cWarn('eg.    ') + param.eg);
+            console.log('');
+        }
+    }
+}
+
+/**
+ * 打印配置示例
+ */
+function printConfEg() {
+    console.log('------------------------------------------------------------------');
+    console.log('-- ' + cTitle(cWarn('配置示例：')));
+    console.log('------------------------------------------------------------------');
+    let confEg = {};
+    for (let param in confInfoObj) {
+        confEg[param] = confInfoObj[param].eg;
+    }
+    let confEgStr = beautify(JSON.stringify(confEg), {indent_size: 4});
+    console.log(confEgStr);
+}
+
+/**
+ * 打印所有参数说明
+ */
+function printConfParamAll() {
+    printConfParamIsMust(true);
+    printConfParamIsMust(false);
+    printConfEg();
+}
+
+/**
+ * 配置帮助函数
+ */
+function helpConf() {
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'list',
+            name: 'items',
+            message: '请选择需要查看的参数或版块：',
+            choices: [{
+                name: '1. 全部参数',
+                value: 'all'
+            }, {
+                name: '2. 必选参数',
+                value: 'must'
+            }, {
+                name: '3. 非必选参数',
+                value: 'notMust'
+            }, {
+                name: '4. 自定义查看',
+                value: 'custom'
+            }, {
+                name: '5. 配置示例',
+                value: 'eg'
+            }]
+        }, function (resConf) {
+            switch (resConf.items) {
+                case 'all':
+                    printConfParamAll();
+                    break;
+                case 'must':
+                    printConfParamIsMust(true);
+                    break;
+                case 'notMust':
+                    printConfParamIsMust(false);
+                    break;
+                case 'custom':
+                    helpConfCustom();
+                    break;
+                case 'eg':
+                    printConfEg();
+                    break;
+            }
+        })
+    );
+}
+
+/**
+ * 配置帮助： 自选参数说明
+ */
+function helpConfCustom() {
+    let choicesArr = [];
+    for (let p in confInfoObj) {
+        choicesArr.push({
+            name: '--' + p,
+            value: p
+        });
+    }
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'checkbox',
+            name: 'params',
+            message: '请选择您所需要查看的参数：',
+            choices: choicesArr
+        }, function (resParam) {
+            printConfParamHelp(resParam.params);
+        })
+    );
+}
+
+// ==================================================================
+// globle help info
+gulp.task('h', function () {
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'list',
+            name: 'helpType',
+            message: '请选择需要帮助的版块：',
+            choices: [{
+                name: '1. 任务帮助信息',
+                value: 'task'
+            }, {
+                name: "2. 配置帮助信息",
+                value: 'config'
+            }]
+        }, function (res) {
+            switch (res.helpType) {
+                case 'task':
+                    break;
+                case 'config':
+                    helpConf();
+                    break;
+            }
+        })
+    );
 });
 
 // ==================================================================
