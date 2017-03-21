@@ -3,7 +3,7 @@
   "subname": "aiflow",
   "description": "asiainfo ui automation workflow",
   "version": "0.0.9",
-  "release-date": "20170321002205",
+  "release-date": "20170321145324",
   "author": {
     "name": "lfire",
     "email": "yunzhi.li.08@gmail.com"
@@ -29,6 +29,7 @@
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-stage-1": "6.x.x",
     "babel-register": "^6.22.0",
+    "better-console": "^1.0.0",
     "browser-sync": "^2.18.8",
     "colors-cli": "^1.0.7",
     "cssgrace": "^3.0.0",
@@ -45,6 +46,7 @@
     "gulp-less": "^3.3.0",
     "gulp-plumber": "^1.1.0",
     "gulp-postcss": "^6.2.0",
+    "gulp-prompt": "^0.2.0",
     "gulp-sourcemaps": "^2.4.1",
     "gulp-zip": "^4.0.0",
     "js-beautify": "^1.6.11",
