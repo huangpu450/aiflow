@@ -60,6 +60,7 @@ const initWwwDir = wwwDir + '/static/init';
 const initConfPath = logicDir + '/common/config/initpro.js';
 const gulpAction = gutil.env._[0];
 const confProBySearchTag = 'setBySearchPro';
+const confProEndTag = 'endConfigPro';
 
 // 所有项目信息存储对象
 let proList = {};
@@ -1990,6 +1991,9 @@ function confProBySearch(kw) {
     let proChoicesArr = [{
         name: '手动查找项目',
         value: confProBySearchTag
+    }, {
+        name: '结束项目配置',
+        value: confProEndTag
     }];
     let findRs = false;
     if (searchKey !== '') {
@@ -2023,6 +2027,8 @@ function confProBySearch(kw) {
                 if (res.pro == confProBySearchTag) {
                     // ask the search keyword
                     askSearchKw();
+                } else if (res.pro == confProEndTag) {
+                    console.info("Info:: 项目配置结束！");
                 } else {
                     // select config item
                     let curPro;
@@ -2093,8 +2099,11 @@ function setItemValue(pro, item) {
                 }
 
                 updateConfFile(pro);
+                console.info("Info:: 配置更新成功！");
+                gulp.start('c');
             } else {
-                console.warn("Warn:: 值未发生改变，配置结束！");
+                console.warn("Warn:: 新值未发生改变，配置无效！");
+                gulp.start('c');
             }
         })
     );
@@ -2106,6 +2115,9 @@ gulp.task('c', function () {
     let proChoicesArr = [{
         name: '手动查找项目',
         value: confProBySearchTag
+    }, {
+        name: '结束项目配置',
+        value: confProEndTag
     }];
     for (let pro of proList.pro) {
         proChoicesArr.push({
@@ -2123,6 +2135,8 @@ gulp.task('c', function () {
             if (res.pro == confProBySearchTag) {
                 // ask the search keyword
                 askSearchKw();
+            } else if (res.pro == confProEndTag) {
+                console.info("Info:: 项目配置结束！");
             } else {
                 // select config item
                 let curPro;
