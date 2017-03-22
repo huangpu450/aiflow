@@ -41,7 +41,7 @@ export default {
         "name": "guodanian",
         "title": "湖南移动-过大年聚合页",
         "dev": "pc",
-        "author": "liyz,susj",
+        "author": "",
         "type": "web&wap",
         "date": "2016-11-30",
         "remUnit": 75,
