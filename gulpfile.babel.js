@@ -67,28 +67,178 @@ let proList = {};
 
 // 项目任务帮助信息
 let taskInfoObj = {
+    "start": {
+        "name": "服务启动",
+        "cmd": "npm start",
+        "desc": "启动 nodejs 服务，开启端口兼听，默认兼听 1234 端口。\n\t是项目运行的第一个命令。",
+        "param": [],
+        "eg": [{
+            "cmd": "npm start",
+            "desc": "启动框架服务"
+        }]
+    },
     "init": {
-        "name": "init",
-        "param": {
-            "pro": {
-                "name": "pro",
-                "desc": "项目名称，用于唯一标识项目的字符串",
-                "must": true,
-                "eg": "guodanian"
-            },
-            "sn": {
-                "name": "sn",
-                "desc": "项目编号，用于唯一标识项目",
-                "must": true,
-                "eg": "2016-HN026"
-            }
-        },
+        "name": "项目初始化",
+        "cmd": "gulp init",
+        "desc": "项目初始化，将新建的项目配置文件，转化为一个完整目录\n\t结构的可执行项目。",
+        "param": [{
+            "name": "pro",
+            "desc": "项目名称，用于唯一标识项目的字符串，与 sn 任选其一。",
+            "must": true,
+            "eg": "guodanian"
+        }, {
+            "name": "sn",
+            "desc": "项目编号，用于唯一标识项目，与 pro 任选其一。",
+            "must": true,
+            "eg": "2016-HN026"
+        }],
         "eg": [{
             "cmd": "gulp init --pro guodanian",
             "desc": "初始化一个叫 guodanian 的项目"
         }, {
             "cmd": "gulp init --sn 2016-HN026",
             "desc": "初始化一个以 2016-HN026 为编号的项目"
+        }]
+    },
+    "default": {
+        "name": "项目实时监控",
+        "cmd": "gulp default",
+        "desc": "服务启动后，该任务可以实时监听到项目文件所发生的改动，\n\t并实时更新到浏览器，实现用户可以在无刷新的情况下实时\n\t查看页面的变化。默认监听端口为 3000。",
+        "param": [{
+            "name": "pro",
+            "desc": "项目名称，用于唯一标识项目的字符串，与 sn 任选其一。",
+            "must": true,
+            "eg": "guodanian"
+        }, {
+            "name": "sn",
+            "desc": "项目编号，用于唯一标识项目，与 pro 任选其一。",
+            "must": true,
+            "eg": "2016-HN026"
+        }],
+        "eg": [{
+            "cmd": "gulp deault --pro guodanian",
+            "desc": "实时监控开发项目 guodanian"
+        }, {
+            "cmd": "gulp --pro guodanian",
+            "desc": "与上一个命令等效，因为是 default 任务，因此，default 参数可以省略"
+        }, {
+            "cmd": "gulp --sn 2016-HN026",
+            "desc": "以项目编号为唯一索引，实时监听项目。"
+        }]
+    },
+    "make": {
+        "name": "项目代码编译",
+        "cmd": "gulp make",
+        "desc": "将项目中的 LESS，以及其他分模块开发的代码进行编译以及合并，\n\t这是项目发布前的一个必备动作。",
+        "param": [{
+            "name": "pro",
+            "desc": "项目名称，用于唯一标识项目的字符串，与 sn 任选其一。",
+            "must": true,
+            "eg": "guodanian"
+        }, {
+            "name": "sn",
+            "desc": "项目编号，用于唯一标识项目，与 pro 任选其一。",
+            "must": true,
+            "eg": "2016-HN026"
+        }],
+        "eg": [{
+            "cmd": "gulp make --pro guodanian",
+            "desc": "编译项目 guodanian"
+        }, {
+            "cmd": "gulp make --sn 2016-HN026",
+            "desc": "以项目编号为唯一索引，编译项目。"
+        }]
+    },
+    "dist": {
+        "name": "项目代码发布",
+        "cmd": "gulp dist",
+        "desc": "将项目中编译好的文件，进行压缩，合并处理，\n\t并发布到 " + cWarn('www/static/xxxx/dist/') + " 目录下，发布的文件是纯静态编码，\n\t可以直接本地查看，不依赖于服务。发布的同时，\n\t会在发布目录中将所有相关文件打包成相应的 ZIP 文件，\n\t并加上了项目相关信息及时间戳于文件名上，便于文件辨别和传播。",
+        "param": [{
+            "name": "pro",
+            "desc": "项目名称，用于唯一标识项目的字符串，与 sn 任选其一。",
+            "must": true,
+            "eg": "guodanian"
+        }, {
+            "name": "sn",
+            "desc": "项目编号，用于唯一标识项目，与 pro 任选其一。",
+            "must": true,
+            "eg": "2016-HN026"
+        }],
+        "eg": [{
+            "cmd": "gulp dist --pro guodanian",
+            "desc": "发布项目 guodanian"
+        }, {
+            "cmd": "gulp dist --sn 2016-HN026",
+            "desc": "以项目编号为唯一索引，发布项目。"
+        }]
+    },
+    "archive": {
+        "name": "项目代码归档",
+        "cmd": "gulp archive",
+        "desc": "在工程目录，因长期项目开发，会导致目录下的项目文件很多，\n\t这样对于以 IDE 为开发工具的场景下，IDE 的加载速度变慢（\n\tIDE会计算各文件的索引）。因此，设计该命令，将项目代码\n\t转移到其他的非索引目录。另外，当有多人合作开发项目时，\n\t归档好的项目文件，可以整体打包分发，便于在项目组内进行\n\t传播，同时又提供了一个相对隔离的环境，使大家相互之间不受\n\t干扰。归档目录如：\n" + cWarn('\tarchive/2016-HN026-guodanian-湖南移动-过大年聚合页/') + "\n\t对应的目录下会生成带时间戳的 ZIP 文件，即所有归档的源文件\n\t压缩包，可用于直接分发。",
+        "param": [{
+            "name": "pro",
+            "desc": "项目名称，用于唯一标识项目的字符串，与 sn 任选其一。",
+            "must": true,
+            "eg": "guodanian"
+        }, {
+            "name": "sn",
+            "desc": "项目编号，用于唯一标识项目，与 pro 任选其一。",
+            "must": true,
+            "eg": "2016-HN026"
+        }],
+        "eg": [{
+            "cmd": "gulp archive --pro guodanian",
+            "desc": "归档项目 guodanian，工程目录下的源文件不会删除"
+        }, {
+            "cmd": "gulp archive --sn 2016-HN026",
+            "desc": "以项目编号为唯一索引，归档项目。工程目录下的源文件不会删除"
+        }]
+    },
+    "archive:del": {
+        "name": "项目代码归档并清空源文件",
+        "cmd": "gulp archive:del",
+        "desc": "只与 gulp archive 多了一步将源工程目录\n" + cWarn('\tsrc/xxxx/\n\tview/xxxx/\n\twww/static/xxxx/\n') + "\t中的文件清除",
+        "param": [{
+            "name": "pro",
+            "desc": "项目名称，用于唯一标识项目的字符串，与 sn 任选其一。",
+            "must": true,
+            "eg": "guodanian"
+        }, {
+            "name": "sn",
+            "desc": "项目编号，用于唯一标识项目，与 pro 任选其一。",
+            "must": true,
+            "eg": "2016-HN026"
+        }],
+        "eg": [{
+            "cmd": "gulp archive:del --pro guodanian",
+            "desc": "归档项目 guodanian，工程目录下的源文件不会删除"
+        }, {
+            "cmd": "gulp archive:del --sn 2016-HN026",
+            "desc": "以项目编号为唯一索引，归档项目。工程目录下的源文件不会删除"
+        }]
+    },
+    "reload": {
+        "name": "项目代码重加载",
+        "cmd": "gulp reload",
+        "desc": "项目归档操作的逆操作，将归档目录中的源码，如：\n" + cWarn('\tarchive/2016-HN026-guodanian-湖南移动-过大年聚合页/') + "\n\t重新加载到工程目录。",
+        "param": [{
+            "name": "pro",
+            "desc": "项目名称，用于唯一标识项目的字符串，与 sn 任选其一。",
+            "must": true,
+            "eg": "guodanian"
+        }, {
+            "name": "sn",
+            "desc": "项目编号，用于唯一标识项目，与 pro 任选其一。",
+            "must": true,
+            "eg": "2016-HN026"
+        }],
+        "eg": [{
+            "cmd": "gulp reload --pro guodanian",
+            "desc": "重加载项目 guodanian"
+        }, {
+            "cmd": "gulp reload --sn 2016-HN026",
+            "desc": "以项目编号为唯一索引，重加载项目。"
         }]
     }
 };
@@ -119,7 +269,7 @@ let confInfoObj = {
     },
     "dev": {
         "key": "dev",
-        "desc": "项目展示的平台类型，可用于决定CSS的编译方式。\n       可选值:: pc/phone\n       只有当CSS开发过程中，将源码编入：\n         " + cNotice('comm*.css or comm*.less') + "\n         " + cNotice("main*.css or main*.less") + "\n       这种情况下系统会根据该参数判断编译方式。\n       其他情况不需要配置。",
+        "desc": "项目展示的平台类型，可用于决定CSS的编译方式。\n\t可选值:: pc/phone\n\t只有当CSS开发过程中，将源码编入：\n\t    " + cNotice('comm*.css or comm*.less') + "\n\t    " + cNotice("main*.css or main*.less") + "\n\t这种情况下系统会根据该参数判断编译方式。\n\t其他情况不需要配置。",
         "eg": "phone",
         "must": true,
         "default": 'pc'
@@ -134,7 +284,7 @@ let confInfoObj = {
     },
     "type": {
         "key": "type",
-        "desc": "项目类型，指定项目属于哪种类型，会在哪种场景下展示。\n       可选值:: web/wap/all",
+        "desc": "项目类型，指定项目属于哪种类型，会在哪种场景下展示。\n\t可选值:: web/wap/all",
         "eg": "web",
         "must": false,
         "default": ''
@@ -155,7 +305,7 @@ let confInfoObj = {
     },
     "compileCss": {
         "key": "compileCss",
-        "desc": "CSS编译方式，指定CSS是以某种方式开发的。\n       可选值：less, css，推荐less方式开发。",
+        "desc": "CSS编译方式，指定CSS是以某种方式开发的。\n\t可选值：less, css，推荐less方式开发。",
         "eg": "less",
         "must": false,
         "default": 'css'
@@ -169,7 +319,7 @@ let confInfoObj = {
     },
     "minLevel": {
         "key": "minLevel",
-        "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。\n       智能判断可压缩的空间，存在最大只能压缩到一定程序，\n       参数值增加不会产生效果。",
+        "desc": "图片压缩等级，配置值：0-7，值越大，越压缩比例大。\n\t智能判断可压缩的空间，存在最大只能压缩到一定程序，\n\t参数值增加不会产生效果。",
         "eg": "3",
         "must": false,
         "default": 3
@@ -915,10 +1065,10 @@ gulp.task('conf:help', function () {
                 let param = confInfoObj[gutil.env.param];
                 paramFind = true;
                 console.log('[' + cInfo(param.key) + ']');
-                console.log(cWarn('必选:  ') + (param.must ? cSuccess('是') : cError('否')));
-                console.log(cWarn('说明:  ') + param.desc);
-                console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-                console.log(cWarn('eg.    ') + param.eg);
+                console.log(cWarn('必选:\t') + (param.must ? cSuccess('是') : cError('否')));
+                console.log(cWarn('说明:\t') + param.desc);
+                console.log(cWarn('默认:\t') + (param.default ? param.default : '无'));
+                console.log(cWarn('eg.\t') + param.eg);
                 console.log('');
             }
             if (!paramFind) {
@@ -949,9 +1099,9 @@ gulp.task('conf:help', function () {
                 let param = confInfoObj[paramKey];
                 if (param.must) {
                     console.log('[' + cInfo(param.key) + ']');
-                    console.log(cWarn('说明:  ') + param.desc);
-                    console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-                    console.log(cWarn('eg.    ') + param.eg);
+                    console.log(cWarn('说明:\t') + param.desc);
+                    console.log(cWarn('默认:\t') + (param.default ? param.default : '无'));
+                    console.log(cWarn('eg.\t') + param.eg);
                     console.log('');
                     confEg[param.key] = param.eg;
                 }
@@ -973,9 +1123,9 @@ gulp.task('conf:help', function () {
             let param = confInfoObj[paramKey];
             if (param.must) {
                 console.log('[' + cInfo(param.key) + ']');
-                console.log(cWarn('说明:  ') + param.desc);
-                console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-                console.log(cWarn('eg.    ') + param.eg);
+                console.log(cWarn('说明:\t') + param.desc);
+                console.log(cWarn('默认:\t') + (param.default ? param.default : '无'));
+                console.log(cWarn('eg.\t') + param.eg);
                 console.log('');
                 confEg[param.key] = param.eg;
             }
@@ -988,9 +1138,9 @@ gulp.task('conf:help', function () {
             let param = confInfoObj[paramKey];
             if (!param.must) {
                 console.log('[' + cNotice(param.key) + ']');
-                console.log(cWarn('说明:  ') + param.desc);
-                console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-                console.log(cWarn('eg.    ') + param.eg);
+                console.log(cWarn('说明:\t') + param.desc);
+                console.log(cWarn('默认:\t') + (param.default ? param.default : '无'));
+                console.log(cWarn('eg.\t') + param.eg);
                 console.log('');
                 confEg[param.key] = param.eg;
             }
@@ -1808,10 +1958,10 @@ function printConfParamHelp(paramList) {
     for (let p of paramList) {
         let param = confInfoObj[p];
         console.log('[' + cInfo(param.key) + ']');
-        console.log(cWarn('必选:  ') + (param.must ? cError('是') : cSuccess('否')));
-        console.log(cWarn('说明:  ') + param.desc);
-        console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-        console.log(cWarn('eg.    ') + param.eg);
+        console.log(cWarn('必选:\t') + (param.must ? cError('是') : cSuccess('否')));
+        console.log(cWarn('说明:\t') + param.desc);
+        console.log(cWarn('默认:\t') + (param.default ? param.default : '无'));
+        console.log(cWarn('eg.\t') + param.eg);
         console.log('');
     }
 }
@@ -1929,12 +2079,67 @@ function helpConfCustom() {
         prompt.prompt({
             type: 'checkbox',
             name: 'params',
-            message: '请选择您所需要查看的参数：',
+            message: '请选择参数：',
             choices: choicesArr
-        }, function (resParam) {
-            printConfParamHelp(resParam.params);
+        }, function (res) {
+            printConfParamHelp(res.params);
+            gulp.start('h');
         })
     );
+}
+
+/**
+ * 任务命令帮助
+ */
+function helpCmd() {
+    let choicesArr = [];
+    for (let t in taskInfoObj) {
+        choicesArr.push({
+            name: taskInfoObj[t].name + "::\t" + taskInfoObj[t].cmd,
+            value: t
+        });
+    }
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'checkbox',
+            name: 'cmd',
+            message: '请选择任务命令：',
+            choices: choicesArr
+        }, function (res) {
+            console.log('');
+            printCmdHelp(res.cmd);
+            gulp.start('h');
+        })
+    );
+}
+
+/**
+ * 打印任务命令帮助信息
+ * @param cmdList
+ */
+function printCmdHelp(cmdList) {
+    for (let cmd of cmdList) {
+        console.log('[' + cInfo(taskInfoObj[cmd].cmd) + ']');
+        console.log(cWarn('说明:\t') + taskInfoObj[cmd].desc);
+        if (taskInfoObj[cmd].param.length > 0) {
+            console.log(cWarn('参数:\t'));
+            for (let param of taskInfoObj[cmd].param) {
+                console.log(cWarn('\t--' + param.name) + '\t' + param.desc);
+            }
+        } else {
+            console.log(cWarn('参数:\t无'));
+        }
+        if (taskInfoObj[cmd].eg.length > 0) {
+            console.log(cWarn('eg.\t'));
+            for (let eg of taskInfoObj[cmd].eg) {
+                console.log('\t' + cSuccess(eg.cmd));
+                console.log('\t' + eg.desc);
+                console.log('');
+            }
+        } else {
+            console.log('');
+        }
+    }
 }
 
 // ==================================================================
@@ -1946,18 +2151,25 @@ gulp.task('h', function () {
             name: 'helpType',
             message: '请选择需要帮助的版块：',
             choices: [{
-                name: '1. 任务帮助信息',
-                value: 'task'
+                name: '1. 任务&命令帮助信息',
+                value: 'cmd'
             }, {
                 name: "2. 配置帮助信息",
                 value: 'config'
+            }, {
+                name: "3. 结束查看帮助",
+                value: 'endHelp'
             }]
         }, function (res) {
             switch (res.helpType) {
-                case 'task':
+                case 'cmd':
+                    helpCmd();
                     break;
                 case 'config':
                     helpConf();
+                    break;
+                case 'endHelp':
+                    console.info('帮助结束！');
                     break;
             }
         })
