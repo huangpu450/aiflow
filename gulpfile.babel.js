@@ -2054,7 +2054,7 @@ function confProBySearch(kw) {
  */
 function selectConfItem(pro) {
     let itemChoicesArr = [];
-    for (let param in confInfoObj) {
+    for (let param in pro) {
         if (param != 'sn' && param != 'name' && param != 'title') {
             itemChoicesArr.push({
                 name: param + ':: (' + pro[param] + ')',
