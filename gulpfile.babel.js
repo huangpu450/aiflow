@@ -781,7 +781,13 @@ switch (gulpAction) {
         break;
     case 'archive':
         console.log('==================================================================');
-        console.log('-- ' + cTitle(proName) + ' 项目归档');
+        console.log('-- ' + cTitle(proName) + ' 项目归档（保留工程源代码）');
+        checkProParam();
+        printProHead();
+        break;
+    case 'archive:del':
+        console.log('==================================================================');
+        console.log('-- ' + cTitle(proName) + ' 项目归档（移除工程源代码）');
         checkProParam();
         printProHead();
         break;
@@ -1984,10 +1990,10 @@ function printConfParamIsMust(isMust) {
         let param = confInfoObj[p];
         if (param.must == isMust) {
             console.log('[' + cInfo(param.key) + ']');
-            console.log(cWarn('必选:  ') + (param.must ? cError('是') : cSuccess('否')));
-            console.log(cWarn('说明:  ') + param.desc);
-            console.log(cWarn('默认:  ') + (param.default ? param.default : '无'));
-            console.log(cWarn('eg.    ') + param.eg);
+            console.log(cWarn('必选:\t') + (param.must ? cError('是') : cSuccess('否')));
+            console.log(cWarn('说明:\t') + param.desc);
+            console.log(cWarn('默认:\t') + (param.default ? param.default : '无'));
+            console.log(cWarn('eg.\t') + param.eg);
             console.log('');
         }
     }
@@ -2046,18 +2052,22 @@ function helpConf() {
             switch (resConf.items) {
                 case 'all':
                     printConfParamAll();
+                    gulp.start('h');
                     break;
                 case 'must':
                     printConfParamIsMust(true);
+                    gulp.start('h');
                     break;
                 case 'notMust':
                     printConfParamIsMust(false);
+                    gulp.start('h');
                     break;
                 case 'custom':
                     helpConfCustom();
                     break;
                 case 'eg':
                     printConfEg();
+                    gulp.start('h');
                     break;
             }
         })
