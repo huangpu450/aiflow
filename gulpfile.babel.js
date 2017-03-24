@@ -1941,10 +1941,18 @@ gulp.task('update', function () {
                 .pipe(gulp.dest(rootDir))
                 .on('end', function () {
                     // 执行 npm install
-                    let updateRs = exec('npm install');
+                    console.log('-- ' + cWarn('正在更新 node 模块，请稍候...'));
+                    let installRs = exec('npm install');
+                    installRs.stdout.on('data', function (data) {
+                        console.log('------------------------------------------------------------------');
+                        console.log('-- Libs install result data');
+                        console.log('------------------------------------------------------------------');
+                        gutil.log(data);
+                    });
+                    let updateRs = exec('npm update');
                     updateRs.stdout.on('data', function (data) {
                         console.log('------------------------------------------------------------------');
-                        console.log('-- update result data');
+                        console.log('-- Libs update result data');
                         console.log('------------------------------------------------------------------');
                         gutil.log(data);
                     });
