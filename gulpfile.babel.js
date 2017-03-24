@@ -58,6 +58,7 @@ const initSrcDir = logicDir + '/init';
 const initViewDir = viewDir + '/init';
 const initWwwDir = wwwDir + '/static/init';
 const initConfPath = logicDir + '/common/config/initpro.js';
+const commLibPath = wwwDir + '/commLib';
 const gulpAction = gutil.env._[0];
 const confProBySearchTag = 'setBySearchPro';
 const confProEndTag = 'endConfigPro';
@@ -648,6 +649,7 @@ const distDir = wwwDir + '/static/' + proName + '/dist';
 const proSrcDir = logicDir + '/' + proName;
 const proViewDir = viewDir + '/' + proName;
 const proWwwDir = wwwDir + '/static/' + proName;
+const proLibPath = proWwwDir + '/src/lib';
 const proArchiveDir = archiveDir + '/' + proSn + '-' + proName + '-' + proTitle;
 const archiveConfFileName = aiproConfPre + '-' + proSn + '-' + proName + '-conf.json';
 const archiveConfFilePath = proArchiveDir + '/' + archiveConfFileName;
@@ -872,6 +874,12 @@ switch (gulpAction) {
     case 'c':
         console.log('==================================================================');
         console.log('-- 项目配置');
+        break;
+    case 'i':
+        console.log('==================================================================');
+        console.log('-- ' + cTitle(proName) + ' 项目依赖库安装');
+        checkProParam();
+        checkProDir();
         break;
     case 'update':
         console.log('==================================================================');
@@ -1926,6 +1934,7 @@ gulp.task('update', function () {
         }
 
         if (isNeedUpdate) {
+            del([wwwDir + '/commLib/']);
             newVerPath = verInfo[3];
             gulp.src(newVerPath)
                 .pipe(decompress())
@@ -2372,6 +2381,112 @@ gulp.task('c', function () {
             }
         })
     );
+});
+
+/**
+ * 选择需要安装的库
+ * @param commLibChoicesArr
+ */
+function selectInstallLib(commLibChoicesArr) {
+    if (commLibChoicesArr.length > 0) {
+        gulp.src('gulpfile.babel.js').pipe(
+            prompt.prompt({
+                type: 'checkbox',
+                name: 'libs',
+                message: '请选择库：',
+                choices: commLibChoicesArr
+            }, function (res) {
+                gulp.src(res.libs)
+                    .pipe(gulp.dest(proLibPath))
+                    .on('end', function () {
+                        console.log('-- ' + cSuccess('安装成功！'));
+                        gulp.start('i');
+                    });
+            })
+        );
+    } else {
+        console.error('无可安装的库文件！');
+        gulp.start('i');
+    }
+}
+
+/**
+ * 选择需要卸载的库
+ * @param proLibChoicesArr
+ */
+function selectUninstallLib(proLibChoicesArr) {
+    if (proLibChoicesArr.length > 0) {
+        gulp.src('gulpfile.babel.js').pipe(
+            prompt.prompt({
+                type: 'checkbox',
+                name: 'libs',
+                message: '请选择库：',
+                choices: proLibChoicesArr
+            }, function (res) {
+                del(res.libs);
+                console.log('-- ' + cSuccess('卸载成功！'));
+                gulp.start('i');
+            })
+        );
+    } else {
+        console.error('本项目未安装任何库！');
+        gulp.start('i');
+    }
+}
+
+// ==================================================================
+// install or uninstall libs of project
+gulp.task('i', function () {
+    let actChoicesArr = [{
+        name: '安装库',
+        value: 'install'
+    }, {
+        name: '卸载库',
+        value: 'uninstall'
+    }, {
+        name: '退出',
+        value: 'quit'
+    }];
+
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'list',
+            name: 'action',
+            message: '请选择操作：',
+            choices: actChoicesArr
+        }, function (res) {
+            switch (res.action) {
+                case 'install':
+                    let commLibChoicesArr = [];
+                    let commLib = fs.readdirSync(commLibPath);
+                    commLib.forEach(function (libName, k) {
+                        let tmpCommLibPath = path.join(commLibPath, libName);
+                        commLibChoicesArr.push({
+                            name: libName,
+                            value: tmpCommLibPath
+                        });
+                    });
+                    selectInstallLib(commLibChoicesArr);
+                    break;
+                case 'uninstall':
+                    let proLibChoicesArr = [];
+                    let proLib = fs.readdirSync(proLibPath);
+                    proLib.forEach(function (libName, k) {
+                        let tmpProLibPath = path.join(proLibPath, libName);
+                        proLibChoicesArr.push({
+                            name: libName,
+                            value: tmpProLibPath
+                        });
+                    });
+                    selectUninstallLib(proLibChoicesArr);
+                    break;
+                case 'quit':
+                    console.log('-- ' + cSuccess('操作结束！'));
+                    break;
+            }
+        })
+    );
+
 });
 
 // ==================================================================
