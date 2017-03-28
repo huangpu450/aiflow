@@ -2404,7 +2404,7 @@ function selectInstallLib(commLibChoicesArr) {
                 message: '请选择库：',
                 choices: commLibChoicesArr
             }, function (res) {
-                gulp.src(res.libs)
+                gulp.src(res.libs, {base: commLibPath})
                     .pipe(gulp.dest(proLibPath))
                     .on('end', function () {
                         console.log('-- ' + cSuccess('安装成功！'));
@@ -2468,7 +2468,12 @@ gulp.task('i', function () {
                     let commLibChoicesArr = [];
                     let commLib = fs.readdirSync(commLibPath);
                     commLib.forEach(function (libName, k) {
-                        let tmpCommLibPath = path.join(commLibPath, libName);
+                        let tmpCommLibPath = commLibPath + '/' + libName;
+                        let libInfo = fs.statSync(tmpCommLibPath);
+                        if (libInfo.isDirectory()) {
+                            tmpCommLibPath += '/**/*'
+                        }
+
                         commLibChoicesArr.push({
                             name: libName,
                             value: tmpCommLibPath
