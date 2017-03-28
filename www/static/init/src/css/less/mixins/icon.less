@@ -1,6 +1,6 @@
 // icon
 
-.iconfont(@icon, @w, @h, @color: @gray) {
+.iconfont(@icon, @w, @h, @color: gray) {
   color: @color;
   font-size: min(@w, @h);
   &:before {
@@ -10,6 +10,17 @@
     height: @h;
     line-height: @h;
     color: @color;
+    overflow: hidden;
   }
 }
 
+.iconsvg() {
+  .square(1em;);
+  vertical-align: -0.25em;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+.iconsvg {
+  .iconsvg();
+}
