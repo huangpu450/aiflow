@@ -2,7 +2,7 @@
   "name": "aiui-automation-workflow",
   "subname": "aiflow",
   "description": "asiainfo ui automation workflow",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "release-date": "20170328153001",
   "author": {
     "name": "lfire",
