@@ -1280,7 +1280,7 @@ function updateConfFile(pro) {
         // 如果归档目录中有该项目
         fs.writeFileSync(tmpArchiveConfFilePath, confStr);
     }
-    if (fs.existsSync(tmpSrcDir)) {
+    if (fs.existsSync(tmpDevConfFilePath)) {
         // 如果该项目存在于开发目录中
         fs.writeFileSync(tmpDevConfFilePath, confStr);
     }
@@ -2716,7 +2716,6 @@ function selectNewProDev(pro) {
         })
     );
 }
-
 
 // ==================================================================
 // the default task
