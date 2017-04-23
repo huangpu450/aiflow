@@ -62,6 +62,8 @@ const commLibPath = wwwDir + '/commLib';
 const gulpAction = gutil.env._[0];
 const confProBySearchTag = 'setBySearchPro';
 const confProEndTag = 'endConfigPro';
+const confProExitTag = 'exitConfigPro';
+const confProSaveTag = 'saveConfigPro';
 
 // 所有项目信息存储对象
 let proList = {};
@@ -340,6 +342,12 @@ let confInfoObj = {
         "default": ''
     }
 };
+
+// 项目配置文件模板
+let tplConfObj = {};
+for (let confItem in confInfoObj) {
+    tplConfObj[confItem] = confInfoObj[confItem]['default'];
+}
 
 /**
  * 以某元素为索引数组去重，如果出现重复则合并
@@ -880,6 +888,10 @@ switch (gulpAction) {
         console.log('-- ' + cTitle(proName) + ' 项目依赖库安装');
         checkProParam();
         checkProDir();
+        break;
+    case 'n':
+        console.log('==================================================================');
+        console.log('-- 新建项目');
         break;
     case 'update':
         console.log('==================================================================');
@@ -2292,7 +2304,13 @@ function confProBySearch(kw) {
  * @param pro
  */
 function selectConfItem(pro) {
-    let itemChoicesArr = [];
+    let itemChoicesArr = [{
+        name: 'exit config, without save!!!',
+        value: confProExitTag
+    }, {
+        name: 'save config, write the configrations to file!!!',
+        value: confProSaveTag
+    }];
     for (let param in pro) {
         if (param != 'sn' && param != 'name' && param != 'title') {
             itemChoicesArr.push({
@@ -2308,7 +2326,20 @@ function selectConfItem(pro) {
             message: '请选择需要配置的参数：',
             choices: itemChoicesArr
         }, function (res) {
-            setItemValue(pro, res.item);
+            switch (res.item) {
+                case confProSaveTag:
+                    updateConfFile(pro);
+                    console.info("Info:: 配置更新成功！");
+                    gulp.start('c');
+                    break;
+                case confProExitTag:
+                    console.info("Info:: 退出该项目配置！");
+                    gulp.start('c');
+                    break;
+                default:
+                    setItemValue(pro, res.item);
+                    break;
+            }
         })
     );
 }
@@ -2337,12 +2368,11 @@ function setItemValue(pro, item) {
                     delete pro[item];
                 }
 
-                updateConfFile(pro);
                 console.info("Info:: 配置更新成功！");
-                gulp.start('c');
+                selectConfItem(pro);
             } else {
                 console.warn("Warn:: 新值未发生改变，配置无效！");
-                gulp.start('c');
+                selectConfItem(pro);
             }
         })
     );
@@ -2501,6 +2531,80 @@ gulp.task('i', function () {
     );
 
 });
+
+// ==================================================================
+// new a project
+gulp.task('n', function () {
+
+});
+
+/**
+ * 请求输入新建项目SN码
+ */
+function askNewProSn() {
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'input',
+            name: 'sn',
+            message: '请输入你新建项目编码（如：2017-HN001）：'
+        }, function (res) {
+            console.log(res.sn);
+        })
+    );
+}
+
+function askNewProName() {
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'input',
+            name: 'name',
+            message: '请输入你新建项目名称（如：hnwap）：'
+        }, function (res) {
+            console.log(res.name);
+        })
+    );
+}
+
+function askNewProTitle() {
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'input',
+            name: 'title',
+            message: '请输入你新建项目名称（如：湖南移动-WAP厅）：'
+        }, function (res) {
+            console.log(res.title);
+        })
+    );
+}
+
+function selectNewProDev(pro) {
+    let itemChoicesArr = [{
+        name: 'PC端',
+        value: 'pc'
+    }, {
+        name: '移动端',
+        value: 'phone'
+    }];
+    for (let param in pro) {
+        if (param != 'sn' && param != 'name' && param != 'title') {
+            itemChoicesArr.push({
+                name: param + ':: (' + pro[param] + ')',
+                value: param
+            });
+        }
+    }
+    gulp.src('gulpfile.babel.js').pipe(
+        prompt.prompt({
+            type: 'list',
+            name: 'item',
+            message: '请选择需要配置的参数：',
+            choices: itemChoicesArr
+        }, function (res) {
+            // setItemValue(pro, res.item);
+        })
+    );
+}
+
 
 // ==================================================================
 // the default task
