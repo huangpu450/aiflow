@@ -297,7 +297,7 @@ let confInfoObj = {
         "desc": "项目创建日期",
         "eg": "2016-12-10",
         "must": false,
-        "default": ''
+        "default": moment().format('YYYY-MM-DD')
     },
     "remUnit": {
         "key": "remUnit",
@@ -311,7 +311,7 @@ let confInfoObj = {
         "desc": "CSS编译方式，指定CSS是以某种方式开发的。\n\t可选值：less, css，推荐less方式开发。",
         "eg": "less",
         "must": false,
-        "default": 'css'
+        "default": 'less'
     },
     "minImg": {
         "key": "minImg",
@@ -1263,6 +1263,7 @@ gulp.task('conf:get', function () {
 
 /**
  * 更新配置文件
+ * @param pro
  */
 function updateConfFile(pro) {
     let proConf = formatConf(pro);
@@ -1300,6 +1301,24 @@ function updateConfFile(pro) {
     });
     console.log('------------------------------------------------------------------');
     console.log('-- ' + cInfo(pro.title) + ' 最新配置值');
+    console.log('------------------------------------------------------------------');
+    console.log(confStr);
+}
+
+/**
+ * 新建项目配置
+ * @param pro
+ */
+function newConfFile(pro) {
+    let proConf = formatConf(pro);
+    let confStr = JSON.stringify(proConf);
+    confStr = beautify(confStr, {indent_size: 4});
+
+    let tmpArchiveConfFileName = aiproConfPre + '-' + proConf.sn + '-' + proConf.name + '-conf.json';
+    let tmpDevConfFilePath = logicDir + '/common/config/pro/' + tmpArchiveConfFileName;
+
+    fs.writeFileSync(tmpDevConfFilePath, confStr);
+    console.log('-- ' + cInfo(pro.title) + ' 新项目配置值');
     console.log('------------------------------------------------------------------');
     console.log(confStr);
 }
@@ -2301,15 +2320,19 @@ function confProBySearch(kw) {
 
 /**
  * 选择需要配置的参数
+ *
  * @param pro
+ * @param isNew
  */
-function selectConfItem(pro) {
+function selectConfItem(pro, isNew) {
+    // 判断是否为新建项目
+    let isNewConf = (typeof isNew == 'undefined' ) ? false : isNew;
     let itemChoicesArr = [{
-        name: 'exit config, without save!!!',
-        value: confProExitTag
-    }, {
         name: 'save config, write the configrations to file!!!',
         value: confProSaveTag
+    }, {
+        name: 'exit config, without save!!!',
+        value: confProExitTag
     }];
     for (let param in pro) {
         if (param != 'sn' && param != 'name' && param != 'title') {
@@ -2328,16 +2351,25 @@ function selectConfItem(pro) {
         }, function (res) {
             switch (res.item) {
                 case confProSaveTag:
-                    updateConfFile(pro);
-                    console.info("Info:: 配置更新成功！");
-                    gulp.start('c');
+                    if (!isNewConf) {
+                        updateConfFile(pro);
+                        console.info("Info:: 配置更新成功！");
+                        gulp.start('c');
+                    } else {
+                        newConfFile(pro);
+                        console.info("Info:: 新建项目成功！");
+                    }
                     break;
                 case confProExitTag:
-                    console.info("Info:: 退出该项目配置！");
-                    gulp.start('c');
+                    if (!isNewConf) {
+                        console.info("Info:: 退出该项目配置！");
+                        gulp.start('c');
+                    } else {
+                        console.warn("warn:: 取消新建项目！");
+                    }
                     break;
                 default:
-                    setItemValue(pro, res.item);
+                    setItemValue(pro, res.item, isNewConf);
                     break;
             }
         })
@@ -2349,7 +2381,9 @@ function selectConfItem(pro) {
  * @param pro
  * @param item
  */
-function setItemValue(pro, item) {
+function setItemValue(pro, item, isNew) {
+    // 判断是否为新建项目
+    let isNewConf = (typeof isNew == 'undefined' ) ? false : isNew;
     gulp.src('gulpfile.babel.js').pipe(
         prompt.prompt({
             type: 'input',
@@ -2369,10 +2403,10 @@ function setItemValue(pro, item) {
                 }
 
                 console.info("Info:: 配置更新成功！");
-                selectConfItem(pro);
+                selectConfItem(pro, isNewConf);
             } else {
                 console.warn("Warn:: 新值未发生改变，配置无效！");
-                selectConfItem(pro);
+                selectConfItem(pro, isNewConf);
             }
         })
     );
@@ -2535,48 +2569,133 @@ gulp.task('i', function () {
 // ==================================================================
 // new a project
 gulp.task('n', function () {
-
+    askNewProSn(tplConfObj);
 });
 
 /**
- * 请求输入新建项目SN码
+ * 参数合法性检查
+ *
+ * @param paramName
+ * @param paramVal
+ * @return {boolean}
  */
-function askNewProSn() {
+function checkParam(paramName, paramVal) {
+    let checkRs = true;
+    switch (paramName) {
+        case 'sn':
+            // 不能为空
+            if (paramVal == '') {
+                checkRs = false;
+                console.error('Error:: 项目SN码不能为空！！！');
+                break;
+            }
+            for (let pro of proList.pro) {
+                // SN码不能重复
+                if (pro.sn === paramVal) {
+                    checkRs = false;
+                    console.error('Error:: 项目SN码不能重复！！！');
+                    break;
+                }
+            }
+            break;
+        case 'name':
+            // 不能为空
+            if (paramVal == '') {
+                checkRs = false;
+                console.error('Error:: 项目名称不能为空！！！');
+                break;
+            }
+            for (let pro of proList.pro) {
+                // 项目名称不能重复
+                if (pro.name === paramVal) {
+                    checkRs = false;
+                    console.error('Error:: 项目名称不能重复！！！');
+                    break;
+                }
+            }
+            break;
+        case 'title':
+            // 不能为空
+            if (paramVal == '') {
+                checkRs = false;
+                console.error('Error:: 项目标题不能为空！！！');
+                break;
+            }
+            break;
+    }
+    return checkRs;
+}
+
+/**
+ * 请求输入新建项目SN码
+ * @param pro
+ */
+function askNewProSn(pro) {
     gulp.src('gulpfile.babel.js').pipe(
         prompt.prompt({
             type: 'input',
             name: 'sn',
             message: '请输入你新建项目编码（如：2017-HN001）：'
         }, function (res) {
-            console.log(res.sn);
+            if (checkParam('sn', res.sn)) {
+                console.info('Info:: 新项目SN码为 ' + res.sn);
+                pro.sn = res.sn
+                askNewProName(pro);
+            } else {
+                askNewProSn(pro);
+            }
         })
     );
 }
 
-function askNewProName() {
+/**
+ * 请求输入新项目名称
+ * @param pro
+ */
+function askNewProName(pro) {
     gulp.src('gulpfile.babel.js').pipe(
         prompt.prompt({
             type: 'input',
             name: 'name',
             message: '请输入你新建项目名称（如：hnwap）：'
         }, function (res) {
-            console.log(res.name);
+            if (checkParam('name', res.name)) {
+                console.info('Info:: 新项目名称为 ' + res.name);
+                pro.name = res.name;
+                askNewProTitle(pro);
+            } else {
+                askNewProSn(pro);
+            }
         })
     );
 }
 
-function askNewProTitle() {
+/**
+ * 请求输入新项目标题
+ * @param pro
+ */
+function askNewProTitle(pro) {
     gulp.src('gulpfile.babel.js').pipe(
         prompt.prompt({
             type: 'input',
             name: 'title',
             message: '请输入你新建项目名称（如：湖南移动-WAP厅）：'
         }, function (res) {
-            console.log(res.title);
+            if (checkParam('title', res.title)) {
+                console.info('Info:: 新项目标题为 ' + res.title);
+                pro.title = res.title;
+                selectNewProDev(pro);
+            } else {
+                askNewProTitle(pro);
+            }
         })
     );
 }
 
+/**
+ * 请求选择新项目主要展示端
+ * @param pro
+ */
 function selectNewProDev(pro) {
     let itemChoicesArr = [{
         name: 'PC端',
@@ -2585,22 +2704,15 @@ function selectNewProDev(pro) {
         name: '移动端',
         value: 'phone'
     }];
-    for (let param in pro) {
-        if (param != 'sn' && param != 'name' && param != 'title') {
-            itemChoicesArr.push({
-                name: param + ':: (' + pro[param] + ')',
-                value: param
-            });
-        }
-    }
     gulp.src('gulpfile.babel.js').pipe(
         prompt.prompt({
             type: 'list',
             name: 'item',
-            message: '请选择需要配置的参数：',
+            message: '请选择该项目的主要展示端：',
             choices: itemChoicesArr
         }, function (res) {
-            // setItemValue(pro, res.item);
+            pro.dev = res.item;
+            selectConfItem(pro, true);
         })
     );
 }
