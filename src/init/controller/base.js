@@ -54,6 +54,12 @@ export default class extends Common {
 
         for (var pageObj of compileArr) {
             this.assign(pageObj.data);
+            // assign the data for start page
+            if (pageObj.name == 'start') {
+                let pageData = this.config('data.pages');
+                delete pageData.start;
+                this.assign('pageData', pageData);
+            }
             // let cont = yield this.fetch('app/' + pageObj.name);
             let cont = await this.fetch('app/' + pageObj.name);
             fs.writeFile(distDir + '/' + pageObj.name + '.html', cont, function (err) {
