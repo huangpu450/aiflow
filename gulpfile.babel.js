@@ -1015,7 +1015,10 @@ gulp.task('copy', ['clean'], function () {
     }
     let js = gulp.src(srcDir + '/js/**')
         .pipe(gulp.dest(distDir + '/js/'));
-    return merge(lib, img, js);
+    // 页面索引工具引入资源存放
+    let tmp = gulp.src(srcDir + '/tmp/**')
+        .pipe(gulp.dest(distDir + '/tmp/'));
+    return merge(lib, img, js, tmp);
 });
 
 // ==================================================================
