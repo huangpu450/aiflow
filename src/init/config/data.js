@@ -9,6 +9,11 @@
 
 export default {
     'pages': {
+        start: {
+            action: 'start',
+            title: 'Public by Aiflow',
+            data: {}
+        },
         index: {
             action: 'index',
             title: '首页',
