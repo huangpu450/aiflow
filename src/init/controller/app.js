@@ -13,7 +13,6 @@ export default class extends Base {
     // }
     * startAction() {
         let pageData = this.config('data.pages');
-        delete pageData.start;
         this.assign('pageData', pageData);
         return this.display();
     }

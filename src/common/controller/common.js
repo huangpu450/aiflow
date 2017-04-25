@@ -20,6 +20,7 @@ export default class extends think.controller.base {
         super.init(http);
         // get the config of the project
         this.proConf = this.getProConfig('name', http.module);
+        this.assign('proConf', this.proConf);
         this.assign(this.proDevParam(this.proConf.name));
     }
 

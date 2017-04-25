@@ -23,7 +23,8 @@
     {#<link rel="stylesheet" type="text/css" href="{{ proUrl }}/tmp/web.css"/>#}
 
     <!-- JS -->
-    <script type="text/javascript" src="{{ proUrl }}/tmp/jquery-3.1.1.min.js"></script>
+    {#<script type="text/javascript" src="{{ proUrl }}/tmp/jquery-3.1.1.min.js"></script>#}
+    <script type="text/javascript" src="{{ proUrl }}/tmp/jquery-2.2.4.min.js"></script>
     <script type="text/javascript" src="{{ proUrl }}/tmp/DataTables-1.10.13/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="{{ proUrl }}/tmp/DataTables-1.10.13/dataTables.semanticui.min.js"></script>
     <script type="text/javascript" src="{{ proUrl }}/tmp/Semantic-UI-2.2.9/dist/semantic.min.js"></script>
@@ -230,7 +231,9 @@
                     {% if pageName != 'start' %}
                         <tr>
                             <td>
-                                <a class="page_link" href="{{ proUri }}/{{ pageConf.action }}.html" target="frame">
+                                {#<a class="page_link" href="{{ proUri }}/{{ pageConf.action }}.html" target="frame">#}
+                                <a class="page_link" href="javascript:;"
+                                   data-url="{{ proUri }}/{{ pageConf.action }}.html">
                                     {{ pageConf.action }}.html
                                     <br/> {{ pageConf.title }}
                                 </a>
@@ -244,14 +247,24 @@
     </div>
     <div class="pusher">
         {# main content #}
-        <div class="frame_box frame_web">
-            <div class="frame_head">
-                <div class="frame_icon"></div>
+        {% if  proConf.dev  == 'phone' %}
+            <div class="frame_box frame">
+                <div class="frame_head">
+                    <div class="frame_icon"></div>
+                </div>
+                <iframe id="frame" name="frame" class="frame_body dragscroll" onload="controllFrame();"
+                        src="{{ proUri }}/index.html"></iframe>
+                <div class="frame_footer"></div>
             </div>
-            <iframe id="frame" name="frame" class="frame_body dragscroll" onload="controllFrame();"
-                    src="{{ proUri }}/index.html"></iframe>
-            <div class="frame_footer"></div>
-        </div>
+        {% else %}
+            <div class="frame_box frame_web">
+                <div class="frame_head">
+                    <div class="frame_icon"></div>
+                </div>
+                <iframe id="frame" name="frame" class="frame_body dragscroll" src="{{ proUri }}/index.html"></iframe>
+                <div class="frame_footer"></div>
+            </div>
+        {% endif %}
     </div>
 </div>
 <script type="text/javascript">
@@ -272,11 +285,32 @@
             info: false,
             dom: '<"page_filter"f><t>'
         });
+        $(".page_link").click(function () {
+            var url = $(this).data('url');
+            $("#frame").attr('src', url);
+            // wap的情况下隐藏滚动条
+            $(".frame #frame").load(function () {
+                $(window.frames["frame"].document).find("body").addClass('noscrollbar');
+            });
+            $(".frame_web #frame").load(function () {
+                $(window.frames["frame"].document).find("body").removeClass('noscrollbar');
+            });
+        });
         $('.item_web').click(function () {
             $('.frame_box').removeClass('frame').addClass('frame_web');
+            var url = $('#frame').attr('src')
+            $("#frame").attr('src', url);
+            $(".frame_web #frame").load(function () {
+                $(window.frames["frame"].document).find("body").removeClass('noscrollbar');
+            });
         });
         $('.item_wap').click(function () {
             $('.frame_box').removeClass('frame_web').addClass('frame');
+            var url = $('#frame').attr('src')
+            $("#frame").attr('src', url);
+            $(".frame #frame").load(function () {
+                $(window.frames["frame"].document).find("body").addClass('noscrollbar');
+            });
         });
     });
 
