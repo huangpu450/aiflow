@@ -1018,7 +1018,9 @@ gulp.task('copy', ['clean'], function () {
     // 页面索引工具引入资源存放
     let tmp = gulp.src(srcDir + '/tmp/**')
         .pipe(gulp.dest(distDir + '/tmp/'));
-    return merge(lib, img, js, tmp);
+    let readme = gulp.src(srcDir + '/readme.md')
+        .pipe(gulp.dest(distDir));
+    return merge(lib, img, js, tmp, readme);
 });
 
 // ==================================================================
