@@ -325,6 +325,9 @@
         $(".page_link").click(function () {
             $("#frame").removeAttr('style');
             $('#frame').fadeTo(0, 0);
+            setTimeout(function () {
+                $('#frame').fadeTo(0, 1);
+            }, 1000);
         });
         $('.item_web').click(function () {
             $("#frame").removeAttr('style');
@@ -333,6 +336,9 @@
             $('.frame_box .frame_body').removeClass('noscrollbar').addClass('framescrollbar');
             var url = $('#frame').attr('src')
             $("#frame").attr('src', url);
+            setTimeout(function () {
+                $('#frame').fadeTo(0, 1);
+            }, 1000);
         });
         $('.item_wap').click(function () {
             $("#frame").removeAttr('style');
@@ -341,6 +347,9 @@
             $('.frame_box .frame_body').removeClass('framescrollbar').addClass('noscrollbar');
             var url = $('#frame').attr('src')
             $("#frame").attr('src', url);
+            setTimeout(function () {
+                $('#frame').fadeTo(0, 1);
+            }, 1000);
         });
     });
 
