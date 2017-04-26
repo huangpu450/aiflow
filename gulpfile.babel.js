@@ -16,6 +16,7 @@ import path from 'path';
 import plumber from 'gulp-plumber';
 import chmod from 'gulp-chmod';
 import zip from 'gulp-zip';
+import unzip from 'gulp-unzip';
 import decompress from 'gulp-decompress';
 import gutil from 'gulp-util';
 import moment from 'moment';
@@ -413,31 +414,33 @@ function getAllProConf() {
             let archiveDirs = fs.readdirSync(archiveDir);
             archiveDirs.forEach(function (dirName, k) {
                 let tmpProArchivePath = path.join(archiveDir, dirName);
-                if (fs.statSync(tmpProArchivePath).isDirectory()) {
-                    let tmpInfo = {};
-                    let tmpInfoArr = dirName.split('-');
-                    let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
-                    let proName = tmpInfoArr[2];
-                    let proTitle = tmpInfoArr[3];
-                    for (let i = 4; i < tmpInfoArr.length; i++) {
-                        proTitle += '-' + tmpInfoArr[i];
+                // if (fs.statSync(tmpProArchivePath).isDirectory()) {
+                // 处理当遇到 ZIP 文件时，将时间戳和后缀名去除
+                dirName = dirName.replace(/-\d{14}\.zip/g, '');
+                let tmpInfo = {};
+                let tmpInfoArr = dirName.split('-');
+                let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
+                let proName = tmpInfoArr[2];
+                let proTitle = tmpInfoArr[3];
+                for (let i = 4; i < tmpInfoArr.length; i++) {
+                    proTitle += '-' + tmpInfoArr[i];
+                }
+                tmpInfo.sn = proSn;
+                tmpInfo.name = proName;
+                tmpInfo.title = proTitle;
+                let tmpArchiveConfPath = path.join(archiveDir, dirName, aiproConfPre + '-' + proSn + '-' + proName + '-conf.json');
+                if (fs.existsSync(tmpArchiveConfPath)) {
+                    // 使用 require 语法时，路径必须带 ./
+                    let tmpConf = require('./' + tmpArchiveConfPath);
+                    if (!proArr.contains(tmpConf)) {
+                        proArr.add(tmpConf);
                     }
-                    tmpInfo.sn = proSn;
-                    tmpInfo.name = proName;
-                    tmpInfo.title = proTitle;
-                    let tmpArchiveConfPath = path.join(archiveDir, dirName, aiproConfPre + '-' + proSn + '-' + proName + '-conf.json');
-                    if (fs.existsSync(tmpArchiveConfPath)) {
-                        // 使用 require 语法时，路径必须带 ./
-                        let tmpConf = require('./' + tmpArchiveConfPath);
-                        if (!proArr.contains(tmpConf)) {
-                            proArr.add(tmpConf);
-                        }
-                    } else {
-                        if (!proArr.contains(tmpInfo)) {
-                            proArr.add(tmpInfo);
-                        }
+                } else {
+                    if (!proArr.contains(tmpInfo)) {
+                        proArr.add(tmpInfo);
                     }
                 }
+                // }
             });
 
             // 读取批量项目配置信息
@@ -658,7 +661,8 @@ const proSrcDir = logicDir + '/' + proName;
 const proViewDir = viewDir + '/' + proName;
 const proWwwDir = wwwDir + '/static/' + proName;
 const proLibPath = proWwwDir + '/src/lib';
-const proArchiveDir = archiveDir + '/' + proSn + '-' + proName + '-' + proTitle;
+const proArchiveDirName = proSn + '-' + proName + '-' + proTitle;
+const proArchiveDir = archiveDir + '/' + proArchiveDirName;
 const archiveConfFileName = aiproConfPre + '-' + proSn + '-' + proName + '-conf.json';
 const archiveConfFilePath = proArchiveDir + '/' + archiveConfFileName;
 const devConfFilePath = logicDir + '/common/config/pro/' + archiveConfFileName;
@@ -745,6 +749,9 @@ function checkProParam() {
     if (proName === '' || proSn === '') {
         console.log('ERR:: ' + cError('The project param is error, or the project config is gone, please check!'));
         process.exit();
+    } else if (!fs.existsSync(proSrcDir)) {
+        console.log('ERR:: ' + cError('The project source file not exist, please check!'));
+        process.exit();
     }
 }
 
@@ -757,10 +764,6 @@ function checkReloadParam() {
     // 或 传入了 项目编码，但没有匹配到项目名称
     if (proName === '' || proSn === '') {
         console.log('ERR:: ' + cError('The project param is error, or the project config is gone, please check!'));
-        process.exit();
-    } else if (!fs.existsSync(proArchiveDir)) {
-        // 项目信息有匹配到，现在检查目录是否存在
-        console.log('ERR:: ' + cError('The project archive directory is not exists, please check!'));
         process.exit();
     }
 }
@@ -1054,21 +1057,28 @@ gulp.task('archive:conf', ['archive:copy'], function () {
 // task action:: zip
 gulp.task('archive:zip', ['archive:conf'], function () {
     let timeStr = moment().format('YYYYMMDDHHmmss');
-    gulp.src([proArchiveDir + '/**/*', '!' + proArchiveDir + '/*.zip'], {base: archiveDir})
+    return gulp.src([proArchiveDir + '/**/*', '!' + proArchiveDir + '/*.zip'], {base: archiveDir})
         .pipe(chmod(0o755, 0o40755))
         .pipe(zip(proSn + '-' + proName + '-' + proTitle + '-' + timeStr + '.zip'))
-        .pipe(gulp.dest(proArchiveDir))
-        .on('end', function () {
-            process.exit();
-        });
+        // 放入对应的项目目录
+        // .pipe(gulp.dest(proArchiveDir))
+        // 存放在归档根目录下
+        .pipe(gulp.dest(archiveDir))
+});
+
+// remove the directory which copy from work directory
+gulp.task('archive:rm', ['archive:zip'], function () {
+    return gulp.src([proArchiveDir])
+        .pipe(gulp.dest(archiveDir))
+        .pipe(vinyPaths(del));
 });
 
 // task action:: del
-gulp.task('archive:del', ['archive:zip'], function () {
+gulp.task('archive:del', ['archive:rm'], function () {
     del(archiveDirArr);
 });
 
-gulp.task('archive', ['archive:zip']);
+gulp.task('archive', ['archive:rm']);
 
 // ==================================================================
 // combine all project config to a js file
@@ -1405,18 +1415,75 @@ gulp.task('delpro', function () {
 // ==================================================================
 // 项目重新加载，项目归档操作的反操作。将已归档的项目源码，重新加载到开发环境中，便于持续开发。
 // task action:: reload
-gulp.task('reload', function () {
-    gulp.src(
+let tmpTimestamp = 0;
+gulp.task('reload:check', function () {
+    let zipFiles = fs.readdirSync(archiveDir);
+    zipFiles.forEach(function (fileName, k) {
+        if (fileName.indexOf(proArchiveDirName) == 0) {
+            fileName = fileName.replace('.zip', '');
+            fileName = fileName.replace(proArchiveDirName + '-', '');
+            if (fileName > tmpTimestamp) {
+                tmpTimestamp = fileName;
+            }
+        }
+    });
+    // 判断是否找到 ZIP 压缩包
+    if (tmpTimestamp == 0) {
+        // ZIP压缩归档不存在
+        if (!fs.existsSync(proArchiveDir)) {
+            // 解压的归档不存在
+            // 项目信息有匹配到，现在检查目录是否存在
+            console.log('ERR:: ' + cError('The project archive directory and archive zip file is not exists, please check!'));
+            process.exit();
+        }
+    } else {
+        // ZIP压缩归档存在，删除已有解压目录
+        return gulp.src(proArchiveDir)
+            .pipe(gulp.dest(archiveDir))
+            .pipe(vinyPaths(del));
+    }
+});
+
+// unzip archive zip file
+gulp.task('reload:unzip', ['reload:check'], function () {
+    if (tmpTimestamp != 0) {
+        return gulp.src(archiveDir + '/' + proArchiveDirName + '-' + tmpTimestamp + '.zip')
+            .pipe(unzip({keepEmpty: true}))
+            .pipe(gulp.dest(archiveDir));
+    }
+});
+
+// reload the file to work directory
+gulp.task('reload:copydir', ['reload:unzip'], function () {
+    return gulp.src(
         [proArchiveDir + '/**/*', '!' + proArchiveDir + '/*.zip', '!' + proArchiveDir + '/*.json'], {
             base: proArchiveDir
         }
     ).pipe(gulp.dest('./'));
-    gulp.src(
+});
+
+// reload the config file to framework
+gulp.task('reload:copyconf', ['reload:copydir'], function () {
+    return gulp.src(
         [proArchiveDir + '/*.json'], {
             base: proArchiveDir
         }
     ).pipe(gulp.dest('./src/common/config/pro/'));
 });
+
+// recover the archive directory
+gulp.task('reload:recover', ['reload:copyconf'], function () {
+    // 当来源是 ZIP 归档时
+    // clear the unzip file
+    if (tmpTimestamp != 0) {
+        return gulp.src(proArchiveDir)
+            .pipe(gulp.dest(archiveDir))
+            .pipe(vinyPaths(del));
+    }
+});
+
+// reload
+gulp.task('reload', ['reload:recover']);
 
 // CSS压缩处理配置
 let distProcessors = [

@@ -36,19 +36,19 @@ export default {
         "minLevel": 5,
         "svn": "",
         "remark": ""
-    }, {
-        "sn": "2016-HN026",
-        "name": "guodanian",
-        "title": "湖南移动-过大年聚合页",
-        "dev": "pc",
-        "author": "liyz",
-        "type": "web&wap",
-        "date": "2016-11-30",
-        "remUnit": 75,
-        "compileCss": "less",
-        "minImg": false,
-        "minLevel": "3",
-        "svn": "",
-        "remark": ""
+    // }, {
+    //     "sn": "2016-HN026",
+    //     "name": "guodanian",
+    //     "title": "湖南移动-过大年聚合页",
+    //     "dev": "pc",
+    //     "author": "liyz",
+    //     "type": "web&wap",
+    //     "date": "2016-11-30",
+    //     "remUnit": 75,
+    //     "compileCss": "less",
+    //     "minImg": false,
+    //     "minLevel": "3",
+    //     "svn": "",
+    //     "remark": ""
     }]
 }

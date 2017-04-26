@@ -63,32 +63,34 @@ export default class extends think.controller.base {
         let archiveDirs = fs.readdirSync(archiveDir);
         archiveDirs.forEach(function (dirName, k) {
             let tmpProArchivePath = path.join(archiveDir, dirName);
-            if (fs.statSync(tmpProArchivePath).isDirectory()) {
-                let tmpInfo = {};
-                let tmpInfoArr = dirName.split('-');
-                let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
-                let proName = tmpInfoArr[2];
-                let proTitle = tmpInfoArr[3];
-                for (let i = 4; i < tmpInfoArr.length; i++) {
-                    proTitle += '-' + tmpInfoArr[i];
+            // if (fs.statSync(tmpProArchivePath).isDirectory()) {
+            // 处理当遇到 ZIP 文件时，将时间戳和后缀名去除
+            dirName = dirName.replace(/-\d{14}\.zip/g, '');
+            let tmpInfo = {};
+            let tmpInfoArr = dirName.split('-');
+            let proSn = tmpInfoArr[0] + '-' + tmpInfoArr[1];
+            let proName = tmpInfoArr[2];
+            let proTitle = tmpInfoArr[3];
+            for (let i = 4; i < tmpInfoArr.length; i++) {
+                proTitle += '-' + tmpInfoArr[i];
+            }
+            tmpInfo.sn = proSn;
+            tmpInfo.name = proName;
+            tmpInfo.title = proTitle;
+            let tmpArchiveConfPath = path.join(archiveDir, dirName, confPref + '-' + proSn + '-' + proName + '-conf.json');
+            if (fs.existsSync(tmpArchiveConfPath)) {
+                // 使用 require 语法时，路径必须带 ./
+                // let tmpConf = require('./' + tmpArchiveConfPath);
+                let tmpConf = JSON.parse(fs.readFileSync(tmpArchiveConfPath));
+                if (!proArr.contains(tmpConf)) {
+                    proArr.add(tmpConf);
                 }
-                tmpInfo.sn = proSn;
-                tmpInfo.name = proName;
-                tmpInfo.title = proTitle;
-                let tmpArchiveConfPath = path.join(archiveDir, dirName, confPref + '-' + proSn + '-' + proName + '-conf.json');
-                if (fs.existsSync(tmpArchiveConfPath)) {
-                    // 使用 require 语法时，路径必须带 ./
-                    // let tmpConf = require('./' + tmpArchiveConfPath);
-                    let tmpConf = JSON.parse(fs.readFileSync(tmpArchiveConfPath));
-                    if (!proArr.contains(tmpConf)) {
-                        proArr.add(tmpConf);
-                    }
-                } else {
-                    if (!proArr.contains(tmpInfo)) {
-                        proArr.add(tmpInfo);
-                    }
+            } else {
+                if (!proArr.contains(tmpInfo)) {
+                    proArr.add(tmpInfo);
                 }
             }
+            // }
         });
 
         // 再读取批量配置文件中的配置信息
