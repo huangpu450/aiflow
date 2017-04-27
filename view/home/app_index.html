@@ -62,7 +62,7 @@
             width: 200px;
         }
 
-        .proList .proType, .proList .proDate, .proList .proDist {
+        .proList .proType, .proList .proDate, .proList .proDist, .proList .proStart, .proList .proIndex {
             text-align: center;
         }
 
@@ -97,23 +97,27 @@
             <th class="proAuthor">项目作者</th>
             <th class="proDate">立项日期</th>
             <th class="proDist">项目发布</th>
-            <th class="proArchive">项目归档</th>
+            <th class="proArchive">项目索引</th>
+            <th class="proArchive">项目发布索引</th>
+            {#<th class="proArchive">项目归档</th>#}
         </tr>
         </thead>
         <tbody>
         {% for pro in proList.pro %}
-        <tr>
-            <td class="proNum">{{pro.sn | upper}}</td>
-            <td class="proCode">{{pro.name}}</td>
-            <td class="proName"><a href="/{{pro.name}}" target="_blank">{{ pro.title }}</a></td>
-            <td class="proType">{{pro.type}}</td>
-            <td class="proType">{{pro.author}}</td>
-            <td class="proDate">{{pro.date}}</td>
-            <td class="proDist"><a href="/static/{{pro.name}}/dist/index.html" target="_blank">查看发布</a></td>
-            <td class="proArchive">
-                {{baseDir}}/{{pro.sn}}-{{pro.name}}-{{pro.title}}/www/static/{{pro.name}}/dist/index.html
-            </td>
-        </tr>
+            <tr>
+                <td class="proNum">{{ pro.sn | upper }}</td>
+                <td class="proCode">{{ pro.name }}</td>
+                <td class="proName"><a href="/{{ pro.name }}" target="_blank">{{ pro.title }}</a></td>
+                <td class="proType">{{ pro.type }}</td>
+                <td class="proType">{{ pro.author }}</td>
+                <td class="proDate">{{ pro.date }}</td>
+                <td class="proDist"><a href="/static/{{ pro.name }}/dist/index.html" target="_blank">查看发布</a></td>
+                <td class="proStart"><a href="/{{ pro.name }}/app/start" target="_blank">查看当前索引</a></td>
+                <td class="proIndex"><a href="/static/{{ pro.name }}/dist/start.html" target="_blank">查看发布索引</a></td>
+                {#<td class="proArchive">#}
+                {#{{baseDir}}/{{pro.sn}}-{{pro.name}}-{{pro.title}}/www/static/{{pro.name}}/dist/index.html#}
+                {#</td>#}
+            </tr>
         {% endfor %}
         </tbody>
     </table>
