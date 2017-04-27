@@ -24,6 +24,7 @@ import console from 'better-console';
 import prompt from 'gulp-prompt';
 import color from 'colors-cli/safe';
 import cssSprite from 'gulp-css-spritesmith';
+import gulpif from 'gulp-if';
 // display message in different color
 let cError = color.red.bold;
 let cWarn = color.yellow;
@@ -658,6 +659,7 @@ if (proSn === '') {
 // 当前
 const srcDir = wwwDir + '/static/' + proName + '/src';
 const distDir = wwwDir + '/static/' + proName + '/dist';
+const imgSliceDir = srcDir + '/images/slice/';
 const proSrcDir = logicDir + '/' + proName;
 const proViewDir = viewDir + '/' + proName;
 const proWwwDir = wwwDir + '/static/' + proName;
@@ -1526,6 +1528,10 @@ let devProcessors_grace_pc = [
 let devProcessors_grace_phone = [
     cssgrace,
     csscalc,
+    // px2rem({remUnit: remUnit}),
+];
+// grace config for px to rem
+let devProcessors_grace_rem = [
     px2rem({remUnit: remUnit}),
 ];
 
@@ -1591,12 +1597,12 @@ function getDevProcessorsGraceConf(devType) {
 
 // sprite the css background images
 gulp.task('sprite', ['clean'], function () {
-    return gulp.src(srcDir + '/css/*.css')
+    return gulp.src([srcDir + '/css/*.css', !srcDir + '/css/web.css', !srcDir + '/css/wap.css', !srcDir + '/css/comm.css'])
         .pipe(plumber({
             errorHandler: errHandle
         }))
         .pipe(cssSprite({
-            imagepath: srcDir + '/images/slice/',
+            imagepath: imgSliceDir,
             spritedest: srcDir + '/images/',
             spritepath: '../images/',
             padding: 2
@@ -1749,14 +1755,29 @@ switch (compileCssType) {
 }
 
 // 成组 grace 任务
-gulp.task('groupGrace', beforeGraceWorks, groupFiles(cssConcatSrc, function (name, files) {
+gulp.task('groupGrace:topx', beforeGraceWorks, groupFiles(cssConcatSrc, function (name, files) {
     return gulp.src(files)
         .pipe(plumber({
             errorHandler: errHandle
         }))
+        // CSS合并，并完成公式计算
         .pipe(postcss(getDevProcessorsGraceConf(name)))
-        .pipe(gulp.dest(srcDir + '/css'));
+        // do sprite
+        .pipe(cssSprite({
+            imagepath: imgSliceDir,
+            spritedest: srcDir + '/images/',
+            spritepath: '../images/',
+            padding: 2
+        }))
+        .pipe(gulp.dest('./'));
 }));
+
+// px to rem
+gulp.task('groupGrace', ['groupGrace:topx'], function () {
+    return gulp.src(srcDir + '/css/wap.css')
+        .pipe(postcss(devProcessors_grace_rem))
+        .pipe(gulp.dest(srcDir + '/css'));
+});
 
 // ==================================================================
 // 项目编译任务，包括CSS、JS等
