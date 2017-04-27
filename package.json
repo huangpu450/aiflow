@@ -3,7 +3,7 @@
   "subname": "aiflow",
   "description": "asiainfo ui automation workflow",
   "version": "0.1.0",
-  "release-date": "20170425221814",
+  "release-date": "20170427172350",
   "author": {
     "name": "lfire",
     "email": "yunzhi.li.08@gmail.com"
@@ -48,6 +48,7 @@
     "gulp-plumber": "^1.1.0",
     "gulp-postcss": "^6.2.0",
     "gulp-prompt": "^0.2.0",
+    "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^2.4.1",
     "gulp-unzip": "^0.2.0",
     "gulp-zip": "^4.0.0",
