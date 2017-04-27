@@ -50,4 +50,4 @@ src/common/config/pro.js
 !www/static/home
 
 # Ignore the zip file in archive dir
-archive/**/*.zip
+# archive/**/*.zip
