@@ -24,7 +24,7 @@ import console from 'better-console';
 import prompt from 'gulp-prompt';
 import color from 'colors-cli/safe';
 import cssSprite from 'gulp-css-spritesmith';
-import gulpif from 'gulp-if';
+import replace from 'gulp-replace';
 // display message in different color
 let cError = color.red.bold;
 let cWarn = color.yellow;
@@ -1527,11 +1527,12 @@ let devProcessors_grace_pc = [
 // grace config for phone
 let devProcessors_grace_phone = [
     cssgrace,
-    csscalc,
+    csscalc
     // px2rem({remUnit: remUnit}),
 ];
 // grace config for px to rem
 let devProcessors_grace_rem = [
+    cssgrace,
     px2rem({remUnit: remUnit}),
 ];
 
@@ -1595,24 +1596,8 @@ function getDevProcessorsGraceConf(devType) {
     return confArr;
 }
 
-// sprite the css background images
-gulp.task('sprite', ['clean'], function () {
-    return gulp.src([srcDir + '/css/*.css', !srcDir + '/css/web.css', !srcDir + '/css/wap.css', !srcDir + '/css/comm.css'])
-        .pipe(plumber({
-            errorHandler: errHandle
-        }))
-        .pipe(cssSprite({
-            imagepath: imgSliceDir,
-            spritedest: srcDir + '/images/',
-            spritepath: '../images/',
-            padding: 2
-        }))
-        // .pipe(gulp.dest(srcDir + '/css/test/'));
-        .pipe(gulp.dest('./'));
-});
-
 // CSS编译任务
-gulp.task('css', ['sprite'], function () {
+gulp.task('css', ['clean'], function () {
     return gulp.src(srcDir + '/css/*.css')
         .pipe(plumber({
             errorHandler: errHandle
@@ -1762,19 +1747,32 @@ gulp.task('groupGrace:topx', beforeGraceWorks, groupFiles(cssConcatSrc, function
         }))
         // CSS合并，并完成公式计算
         .pipe(postcss(getDevProcessorsGraceConf(name)))
-        // do sprite
+        .pipe(gulp.dest(srcDir + '/css'));
+}));
+
+// sprite the css background images
+gulp.task('sprite', ['groupGrace:topx'], function () {
+    // return gulp.src([srcDir + '/css/*.css', !srcDir + '/css/web.css', !srcDir + '/css/wap.css', !srcDir + '/css/comm.css'])
+    return gulp.src([srcDir + '/css/*.css'])
+        .pipe(plumber({
+            errorHandler: errHandle
+        }))
         .pipe(cssSprite({
             imagepath: imgSliceDir,
             spritedest: srcDir + '/images/',
             spritepath: '../images/',
             padding: 2
         }))
+        // .pipe(gulp.dest(srcDir + '/css/test/'));
         .pipe(gulp.dest('./'));
-}));
+});
 
 // px to rem
-gulp.task('groupGrace', ['groupGrace:topx'], function () {
+gulp.task('groupGrace', ['sprite'], function () {
     return gulp.src(srcDir + '/css/wap.css')
+        .pipe(replace(
+            'background-image: url(../images/wap.png);', 'background-image: url(../images/wap.png);background-size: image-width image-height;'
+        ))
         .pipe(postcss(devProcessors_grace_rem))
         .pipe(gulp.dest(srcDir + '/css'));
 });
