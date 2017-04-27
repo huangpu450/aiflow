@@ -23,6 +23,7 @@ import moment from 'moment';
 import console from 'better-console';
 import prompt from 'gulp-prompt';
 import color from 'colors-cli/safe';
+import cssSprite from 'gulp-css-spritesmith';
 // display message in different color
 let cError = color.red.bold;
 let cWarn = color.yellow;
@@ -999,7 +1000,7 @@ gulp.task('clean', function () {
 });
 
 // 发布到新的目录
-gulp.task('copy', ['clean'], function () {
+gulp.task('copy', ['clean', 'css'], function () {
     let lib = gulp.src(srcDir + '/lib/**')
         .pipe(gulp.dest(distDir + '/lib/'));
     let img;
@@ -1588,8 +1589,24 @@ function getDevProcessorsGraceConf(devType) {
     return confArr;
 }
 
+// sprite the css background images
+gulp.task('sprite', ['clean'], function () {
+    return gulp.src(srcDir + '/css/*.css')
+        .pipe(plumber({
+            errorHandler: errHandle
+        }))
+        .pipe(cssSprite({
+            imagepath: srcDir + '/images/slice/',
+            spritedest: srcDir + '/images/',
+            spritepath: '../images/',
+            padding: 2
+        }))
+        // .pipe(gulp.dest(srcDir + '/css/test/'));
+        .pipe(gulp.dest('./'));
+});
+
 // CSS编译任务
-gulp.task('css', ['clean'], function () {
+gulp.task('css', ['sprite'], function () {
     return gulp.src(srcDir + '/css/*.css')
         .pipe(plumber({
             errorHandler: errHandle
@@ -1861,7 +1878,7 @@ gulp.task('init', ['initdir'], function () {
 // ==================================================================
 // 项目发布任务，发布到指定的文件夹，以及打包压缩
 // task action:: dist
-gulp.task('dist', ['copy', 'css'], function () {
+gulp.task('dist', ['copy'], function () {
     let distRs = exec('node www/development.js ' + proName + '/app/make');
     let timeStr = moment().format('YYYYMMDDHHmmss');
     distRs.stdout.on('data', function (data) {
