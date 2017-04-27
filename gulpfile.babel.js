@@ -1007,7 +1007,7 @@ gulp.task('copy', ['clean', 'css'], function () {
         .pipe(gulp.dest(distDir + '/lib/'));
     let img;
     if (minImg) {
-        img = gulp.src(srcDir + '/images/**')
+        img = gulp.src([srcDir + '/images/**', '!' + srcDir + '/images/{slice,slice/**}'])
             .pipe(cache(imagemin({
                 // optimizationLevel: minLevel, // 0-7，优化等级，默认3
                 progressive: true, // 无损压缩JPG图片，默认 false
@@ -1016,7 +1016,7 @@ gulp.task('copy', ['clean', 'css'], function () {
             })))
             .pipe(gulp.dest(distDir + '/images/'));
     } else {
-        img = gulp.src(srcDir + '/images/**')
+        img = gulp.src([srcDir + '/images/**', '!' + srcDir + '/images/{slice,slice/**}'])
             .pipe(gulp.dest(distDir + '/images/'));
     }
     let js = gulp.src(srcDir + '/js/**')
@@ -1761,7 +1761,8 @@ gulp.task('sprite', ['groupGrace:topx'], function () {
             imagepath: imgSliceDir,
             spritedest: srcDir + '/images/',
             spritepath: '../images/',
-            padding: 2
+            algorithm: 'top-down',
+            padding: 6
         }))
         // .pipe(gulp.dest(srcDir + '/css/test/'));
         .pipe(gulp.dest('./'));
