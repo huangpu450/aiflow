@@ -70,5 +70,8 @@ export default class extends Common {
         }
 
         this.success('compile success!');
+        // 完成之后，进程退出
+        // 只能在命令行下生效，浏览器端会被退出
+        process.exit();
     }
 }
