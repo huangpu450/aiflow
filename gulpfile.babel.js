@@ -47,6 +47,8 @@ import initList from './src/common/config/initpro';
 import appConfig from './src/common/config/config';
 // 配置信息常量
 const aiproConfPath = './src/common/config';
+const aiproConfPort = appConfig.port; //1234
+const aiproConfSyncPort = appConfig.sync_port; //3000
 const aiproConfPre = appConfig.pro_conf_pref; //aipro
 const tmpAiproConfPath = './src/common/config/pro';
 const combConfPath = aiproConfPath + '/pro.js';
@@ -1801,7 +1803,9 @@ gulp.task('browser-sync', function () {
         wwwDir + '/**/*.js',
     ];
     browserSync.init(files, {
-        proxy: "localhost:1234/" + proName
+        port: aiproConfSyncPort,
+        notify: false,
+        proxy: "localhost:" + aiproConfPort + "/" + proName
     });
 });
 
