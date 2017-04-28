@@ -54,11 +54,16 @@
             text-align: left;
         }
 
-        .proNum, .proType, .proDate, .proDist, .proAuthor, .proCode {
+        .proNum, .proType, .proDate, .proAuthor, .proCode {
             width: 100px;
         }
 
-        .proName {
+        .proList table tr td a {
+            float: left;
+            padding-right: 15px;
+        }
+
+        .proName .proDist {
             width: 200px;
         }
 
@@ -97,8 +102,8 @@
             <th class="proAuthor">项目作者</th>
             <th class="proDate">立项日期</th>
             <th class="proDist">项目发布</th>
-            <th class="proArchive">项目索引</th>
-            <th class="proArchive">项目发布索引</th>
+            {#<th class="proArchive">项目索引</th>#}
+            {#<th class="proArchive">项目发布索引</th>#}
             {#<th class="proArchive">项目归档</th>#}
         </tr>
         </thead>
@@ -111,9 +116,17 @@
                 <td class="proType">{{ pro.type }}</td>
                 <td class="proType">{{ pro.author }}</td>
                 <td class="proDate">{{ pro.date }}</td>
-                <td class="proDist"><a href="/static/{{ pro.name }}/dist/index.html" target="_blank">查看发布</a></td>
-                <td class="proStart"><a href="/{{ pro.name }}/app/start" target="_blank">查看当前索引</a></td>
-                <td class="proIndex"><a href="/static/{{ pro.name }}/dist/start.html" target="_blank">查看发布索引</a></td>
+                <td class="proDist">
+                    <a href="/{{ pro.name }}/app/start" target="_blank">查看当前索引</a>
+                    <a href="/static/{{ pro.name }}/dist/index.html" target="_blank">查看发布首页</a>
+                    <a href="/static/{{ pro.name }}/dist/start.html" target="_blank">查看发布索引</a>
+                </td>
+                {#<td class="proStart">#}
+                {#<a href="/{{ pro.name }}/app/start" target="_blank">查看当前索引</a>#}
+                {#</td>#}
+                {#<td class="proIndex">#}
+                {#<a href="/static/{{ pro.name }}/dist/start.html" target="_blank">查看发布索引</a>#}
+                {#</td>#}
                 {#<td class="proArchive">#}
                 {#{{baseDir}}/{{pro.sn}}-{{pro.name}}-{{pro.title}}/www/static/{{pro.name}}/dist/index.html#}
                 {#</td>#}
