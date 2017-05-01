@@ -20,7 +20,8 @@
     left: 50%;
     margin-left: -250px;
     margin-top: -200px;
-    color: #677887
+    color: #677887;
+    box-sizing: content-box;
 }
 
 .m-browsehappy .browsehappy-inner .title {
