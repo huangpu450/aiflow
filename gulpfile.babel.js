@@ -754,8 +754,15 @@ function checkProParam() {
     if (proName === '' || proSn === '') {
         console.log('ERR:: ' + cError('The project param is error, or the project config is gone, please check!'));
         process.exit();
-    } else if (!fs.existsSync(proSrcDir)) {
-        console.log('ERR:: ' + cError('The project source file not exist, please check!'));
+    }
+}
+
+/**
+ * 检查项目是否已加载
+ */
+function checkIsLoad() {
+    if (!fs.existsSync(proSrcDir)) {
+        console.log('ERR:: ' + cError('The project source file not exist, please load the project to work directory, please check!'));
         process.exit();
     }
 }
@@ -801,12 +808,14 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目归档（保留工程源代码）');
         checkProParam();
+        checkIsLoad();
         printProHead();
         break;
     case 'archive:del':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目归档（移除工程源代码）');
         checkProParam();
+        checkIsLoad();
         printProHead();
         break;
     case 'delpro':
@@ -848,6 +857,7 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
         checkProParam();
+        checkIsLoad();
         printProHead();
         break;
     case 'search':
@@ -882,6 +892,7 @@ switch (gulpAction) {
         console.log('==================================================================');
         console.log('-- 配置项目参数:: ' + cTitle(proName));
         checkProParam();
+        checkIsLoad();
         break;
     case 'h':
         console.log('==================================================================');
@@ -890,11 +901,13 @@ switch (gulpAction) {
     case 'c':
         console.log('==================================================================');
         console.log('-- 项目配置');
+        checkIsLoad();
         break;
     case 'i':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目依赖库安装');
         checkProParam();
+        checkIsLoad();
         checkProDir();
         break;
     case 'n':
