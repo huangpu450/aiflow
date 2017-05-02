@@ -1916,21 +1916,18 @@ gulp.task('init', ['initdir'], function () {
 // 项目发布任务，发布到指定的文件夹，以及打包压缩
 // task action:: dist
 gulp.task('dist', ['copy'], function () {
-    let distRs = exec('node www/development.js ' + proName + '/app/make');
-    let timeStr = moment().format('YYYYMMDDHHmmss');
-    distRs.stdout.on('data', function (data) {
-        console.log('------------------------------------------------------------------');
-        console.log('-- Dist result data');
-        console.log('------------------------------------------------------------------');
-        console.log('-- ' + data);
-        // make zip file
-        gulp.src(distDir + '/**/*.*')
-            .pipe(chmod(0o755, 0o40755))
-            .pipe(zip(proSn + '.' + proTitle + '-' + timeStr + '.zip'))
-            .pipe(gulp.dest(distDir))
-            .on('end', function () {
-                process.exit();
-            });
+    let distRs = exec('node www/development.js ' + proName + '/app/make', function (error, stdout, stderr) {
+        if (error) {
+            console.error('Error:: ' + error);
+            return;
+        } else {
+            let timeStr = moment().format('YYYYMMDDHHmmss');
+            // make zip file
+            gulp.src(distDir + '/**/*.*')
+                .pipe(chmod(0o755, 0o40755))
+                .pipe(zip(proSn + '.' + proTitle + '-' + timeStr + '.zip'))
+                .pipe(gulp.dest(distDir));
+        }
     });
 });
 

@@ -62,16 +62,21 @@ export default class extends Common {
             }
             // let cont = yield this.fetch('app/' + pageObj.name);
             let cont = await this.fetch('app/' + pageObj.name);
-            fs.writeFile(distDir + '/' + pageObj.name + '.html', cont, function (err) {
-                if (err) {
-                    throw err;
-                }
-            });
+            // fs.writeFile(distDir + '/' + pageObj.name + '.html', cont, function (err) {
+            //     if (err) {
+            //         throw err;
+            //     }
+            // });
+            // 将编译文件改为同步方法
+            fs.writeFileSync(distDir + '/' + pageObj.name + '.html', cont);
         }
 
         this.success('compile success!');
         // 完成之后，进程退出
         // 只能在命令行下生效，浏览器端会被退出
-        process.exit();
+        // 存在问题
+        // process.exit();
+        // 将其改为同步调用
+        await process.exit();
     }
 }
