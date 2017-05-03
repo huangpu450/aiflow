@@ -10,6 +10,7 @@ import gulp from 'gulp';
 import del from 'del';
 import merge from 'merge-stream';
 import vinyPaths from 'vinyl-paths';
+import vinyFs from 'vinyl-fs';
 import concat from 'gulp-concat';
 import fs from 'fs';
 import path from 'path';
@@ -25,6 +26,7 @@ import prompt from 'gulp-prompt';
 import color from 'colors-cli/safe';
 import cssSprite from 'gulp-css-spritesmith';
 import replace from 'gulp-replace';
+import changed from 'gulp-changed';
 // display message in different color
 let cError = color.red.bold;
 let cWarn = color.yellow;
@@ -856,6 +858,13 @@ switch (gulpAction) {
     case 'list:pages':
         console.log('==================================================================');
         console.log('-- ' + cTitle(proName) + ' 项目包含页面列表');
+        checkProParam();
+        checkIsLoad();
+        printProHead();
+        break;
+    case 'update:pro':
+        console.log('==================================================================');
+        console.log('-- 项目升级');
         checkProParam();
         checkIsLoad();
         printProHead();
@@ -2125,6 +2134,61 @@ gulp.task('update', function () {
         console.log('-- ' + cWarn('当前版本已是最新，无需升级！'));
     }
     console.log('------------------------------------------------------------------');
+});
+
+/**
+ * 升级 data.js 配置文件，加入 start 页配置
+ * @param filePath
+ */
+function updateDataFile(filePath) {
+    let tmpPath = filePath;
+    // 匹配配置内容的正则
+    let confReg = /{[\w\W]*}\s*/gi;
+    // 使用 require 语法时，路径必须带 ./
+    let dataObj = require('./' + tmpPath).default;
+    let startPage = {
+        action: 'start',
+        title: 'Public by Aiflow',
+        data: {}
+    };
+    let confCon = fs.readFileSync(tmpPath, 'utf-8');
+    if (typeof dataObj.pages.start == 'undefined') {
+        dataObj.pages.start = startPage;
+        let tmpConfStr = confCon.replace(confReg, '') + JSON.stringify(dataObj);
+        tmpConfStr = beautify(tmpConfStr, {indent_size: 4});
+        fs.writeFileSync(tmpPath, tmpConfStr);
+        gutil.log(cInfo(path.resolve(tmpPath)) + ' 升级完成');
+    } else {
+        gutil.log(cInfo(path.resolve(tmpPath)) + ' 已最新，不需要升级');
+    }
+}
+
+// 升级某一项目
+gulp.task('update:pro', function () {
+    // 升级 data.js 配置文件
+    updateDataFile(proSrcDir + '/config/data.js');
+    // 控制器升级
+    let src = gulp.src(initSrcDir + '/controller/**/*')
+        .pipe(gulp.dest(proSrcDir + '/controller/'));
+    // 页面公共块升级
+    let viewPublic = vinyFs.src(initViewDir + '/public/**/*')
+        .pipe(vinyFs.dest(proViewDir + '/public/', {overwrite: false}));
+    // start 视图升级
+    let viewStart = gulp.src(initViewDir + '/app_start.html')
+        .pipe(gulp.dest(proViewDir + '/'));
+    // start 视图依赖库升级
+    let wwwTmp = gulp.src(initWwwDir + '/src/tmp/**/*')
+        .pipe(gulp.dest(proWwwDir + '/src/tmp/'));
+    // 关于 start 视图 readme 文件升级
+    let wwwReadme = gulp.src(initWwwDir + '/src/readme.md')
+        .pipe(gulp.dest(proWwwDir + '/src/'));
+    // less mixins 升级
+    let wwwMixins = gulp.src(initWwwDir + '/src/css/less/mixins/**/*')
+        .pipe(gulp.dest(proWwwDir + '/src/css/less/mixins/'));
+    // mixins 索引升级
+    let wwwMixinsIndex = gulp.src(initWwwDir + '/src/css/less/lib-mixins.less')
+        .pipe(gulp.dest(proWwwDir + '/src/css/less/'));
+    return merge(src, viewPublic, viewStart, wwwTmp, wwwReadme, wwwMixins, wwwMixinsIndex);
 });
 
 /**
