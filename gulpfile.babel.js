@@ -26,7 +26,6 @@ import prompt from 'gulp-prompt';
 import color from 'colors-cli/safe';
 import cssSprite from 'gulp-css-spritesmith';
 import replace from 'gulp-replace';
-import changed from 'gulp-changed';
 // display message in different color
 let cError = color.red.bold;
 let cWarn = color.yellow;

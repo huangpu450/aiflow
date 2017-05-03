@@ -3,7 +3,7 @@
   "subname": "aiflow",
   "description": "asiainfo ui automation workflow",
   "version": "0.1.0",
-  "release-date": "20170502225128",
+  "release-date": "20170503213939",
   "author": {
     "name": "lfire",
     "email": "yunzhi.li.08@gmail.com"
@@ -63,6 +63,7 @@
     "postcss-discard-comments": "^2.0.4",
     "postcss-import": "^9.0.0",
     "postcss-px2rem": "^0.3.0",
+    "vinyl-fs": "^2.4.4",
     "vinyl-paths": "^2.1.0"
   },
   "repository": "",
